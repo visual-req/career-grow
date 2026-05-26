@@ -1,0 +1,618 @@
+{
+  "hashtagCategories": [
+    {
+      "name": "角色",
+      "tags": [
+        "#敏捷教练",
+        "#DevOps工程师",
+        "#后端工程师",
+        "#前端工程师",
+        "#产品经理",
+        "#项目经理",
+        "#测试",
+        "#测试经理",
+        "#测试开发"
+      ]
+    },
+    {
+      "name": "领域",
+      "tags": ["#分布式系统", "#云原生", "#数据分析", "#信息安全", "#大模型应用"]
+    },
+    {
+      "name": "特质",
+      "tags": [
+        "#执行力",
+        "#结构化思维",
+        "#系统化思维",
+        "#可视化表达",
+        "#沟通协作",
+        "#沟通技巧",
+        "#谈判技巧",
+        "#引导技巧",
+        "#教练技巧",
+        "#结果导向",
+        "#自驱"
+      ]
+    }
+  ],
+  "industryOptions": [
+    { "value": "互联网" },
+    { "value": "AI/大模型" },
+    { "value": "企业服务" },
+    { "value": "金融" },
+    { "value": "物流" },
+    { "value": "供应链" },
+    { "value": "汽车" },
+    { "value": "制造业" },
+    { "value": "教育" },
+    { "value": "医疗健康" },
+    { "value": "游戏" },
+    { "value": "电商" },
+    { "value": "消费品" },
+    { "value": "政府/事业单位" },
+    { "value": "外企" }
+  ],
+  "workModeOptions": [
+    { "label": "远程", "value": "remote" },
+    { "label": "混合", "value": "hybrid" },
+    { "label": "现场", "value": "onsite" }
+  ],
+  "genderOptions": [
+    { "label": "未知", "value": "unknown" },
+    { "label": "男", "value": "male" },
+    { "label": "女", "value": "female" },
+    { "label": "其他", "value": "other" }
+  ],
+  "maritalStatusOptions": [
+    { "label": "未知", "value": "unknown" },
+    { "label": "未婚", "value": "single" },
+    { "label": "已婚", "value": "married" },
+    { "label": "离异", "value": "divorced" },
+    { "label": "丧偶", "value": "widowed" }
+  ],
+  "yesNoUnknownOptions": [
+    { "label": "未知", "value": "unknown" },
+    { "label": "是", "value": "yes" },
+    { "label": "否", "value": "no" }
+  ],
+  "lifeStatusOptions": [
+    { "label": "未知", "value": "unknown" },
+    { "label": "在世", "value": "alive" },
+    { "label": "去世", "value": "deceased" },
+    { "label": "其他", "value": "other" }
+  ],
+  "socialPlatformOptions": [
+    { "value": "GitHub" },
+    { "value": "LinkedIn" },
+    { "value": "知乎" },
+    { "value": "掘金" },
+    { "value": "CSDN" },
+    { "value": "公众号" },
+    { "value": "视频号" },
+    { "value": "B 站" },
+    { "value": "小红书" },
+    { "value": "抖音" },
+    { "value": "快手" },
+    { "value": "Twitter/X" },
+    { "value": "个人博客" }
+  ],
+  "degreeOptions": [
+    { "label": "高中/中专", "value": "高中/中专" },
+    { "label": "大专", "value": "大专" },
+    { "label": "本科", "value": "本科" },
+    { "label": "硕士", "value": "硕士" },
+    { "label": "博士", "value": "博士" },
+    { "label": "博士后", "value": "博士后" },
+    { "label": "其他", "value": "其他" }
+  ],
+  "academicDegreeOptions": [
+    { "label": "学士", "value": "学士" },
+    { "label": "硕士", "value": "硕士" },
+    { "label": "博士", "value": "博士" },
+    { "label": "其他", "value": "其他" }
+  ],
+  "educationTypeOptions": [
+    { "label": "全日制", "value": "全日制" },
+    { "label": "非全日制", "value": "非全日制" },
+    { "label": "自考", "value": "自考" },
+    { "label": "成考", "value": "成考" },
+    { "label": "网教", "value": "网教" },
+    { "label": "开放大学", "value": "开放大学" },
+    { "label": "分学院", "value": "分学院" },
+    { "label": "其他", "value": "其他" }
+  ],
+  "companyTypeOptions": [
+    { "label": "外资（欧美）", "value": "外资（欧美）" },
+    { "label": "外资（日韩台）", "value": "外资（日韩台）" },
+    { "label": "外资（其他）", "value": "外资（其他）" },
+    { "label": "合资", "value": "合资" },
+    { "label": "央企", "value": "央企" },
+    { "label": "国企", "value": "国企" },
+    { "label": "私企", "value": "私企" },
+    { "label": "自营", "value": "自营" },
+    { "label": "自由职业者", "value": "自由职业者" }
+  ],
+  "languageNameOptions": [
+    { "value": "中文" },
+    { "value": "英语" },
+    { "value": "日语" },
+    { "value": "粤语" },
+    { "value": "韩语" },
+    { "value": "德语" },
+    { "value": "法语" },
+    { "value": "西班牙语" }
+  ],
+  "languageLevelOptions": [
+    { "label": "基础", "value": "basic" },
+    { "label": "工作交流", "value": "working" },
+    { "label": "流利", "value": "fluent" },
+    { "label": "母语", "value": "native" }
+  ],
+  "personalityOptions": [
+    { "label": "抗压能力强", "value": "抗压能力强" },
+    { "label": "抗压能力一般", "value": "抗压能力一般" },
+    { "label": "坚持到底的精神强", "value": "坚持到底的精神强" },
+    { "label": "坚持到底的精神一般", "value": "坚持到底的精神一般" },
+    { "label": "团队协作强", "value": "团队协作强" },
+    { "label": "团队协作一般", "value": "团队协作一般" },
+    { "label": "擅长沟通", "value": "擅长沟通" },
+    { "label": "沟通一般", "value": "沟通一般" },
+    { "label": "偏好与人打交道", "value": "偏好与人打交道" },
+    { "label": "偏好与机器打交道", "value": "偏好与机器打交道" },
+    { "label": "偏好内勤", "value": "偏好内勤" },
+    { "label": "偏好外勤", "value": "偏好外勤" }
+  ],
+  "strengthsQuickOptions": [
+    { "label": "结构化思维", "value": "结构化思维" },
+    { "label": "执行力强", "value": "执行力强" },
+    { "label": "结果导向", "value": "结果导向" },
+    { "label": "沟通协作", "value": "沟通协作" },
+    { "label": "学习能力强", "value": "学习能力强" },
+    { "label": "自驱", "value": "自驱" },
+    { "label": "抗压能力强", "value": "抗压能力强" },
+    { "label": "Owner 意识", "value": "Owner 意识" }
+  ],
+  "weaknessesQuickOptions": [
+    { "label": "完美主义（影响效率）", "value": "完美主义（影响效率）" },
+    { "label": "容易焦虑", "value": "容易焦虑" },
+    { "label": "表达不够直接", "value": "表达不够直接" },
+    { "label": "不善于拒绝", "value": "不善于拒绝" },
+    { "label": "过度关注细节", "value": "过度关注细节" },
+    { "label": "优先级判断不稳定", "value": "优先级判断不稳定" },
+    { "label": "拖延", "value": "拖延" },
+    { "label": "抗压能力一般", "value": "抗压能力一般" }
+  ],
+  "skillLevelOptions": [
+    { "label": "入门", "value": "beginner" },
+    { "label": "熟悉", "value": "intermediate" },
+    { "label": "熟练", "value": "proficient" },
+    { "label": "专家", "value": "expert" }
+  ],
+  "artifactTypeOptions": [
+    { "value": "知识产权" },
+    { "value": "专利" },
+    { "value": "图书" },
+    { "value": "论文" },
+    { "value": "行业标准" },
+    { "value": "团体标准" },
+    { "value": "企业规范" },
+    { "value": "开源项目" },
+    { "value": "技术博客" },
+    { "value": "技术文章" },
+    { "value": "课程" },
+    { "value": "视频课" },
+    { "value": "演讲" },
+    { "value": "PPT" },
+    { "value": "视频" },
+    { "value": "报告" },
+    { "value": "白皮书" },
+    { "value": "作品集网站" }
+  ],
+  "skillTreeData": [
+    {
+      "title": "硬技能",
+      "value": "硬技能",
+      "key": "硬技能",
+      "selectable": false,
+      "children": [
+        {
+          "title": "编程语言",
+          "value": "编程语言",
+          "key": "编程语言",
+          "selectable": false,
+          "children": [
+            { "title": "Java", "value": "Java", "key": "Java" },
+            { "title": "JavaScript", "value": "JavaScript", "key": "JavaScript" },
+            { "title": "TypeScript", "value": "TypeScript", "key": "TypeScript" },
+            { "title": "Python", "value": "Python", "key": "Python" },
+            { "title": "Go", "value": "Go", "key": "Go" },
+            { "title": "C++", "value": "C++", "key": "C++" },
+            { "title": "SQL", "value": "SQL", "key": "SQL" }
+          ]
+        },
+        {
+          "title": "前端",
+          "value": "前端",
+          "key": "前端",
+          "selectable": false,
+          "children": [
+            { "title": "Vue", "value": "Vue", "key": "Vue" },
+            { "title": "React", "value": "React", "key": "React" },
+            { "title": "Node.js", "value": "Node.js", "key": "Node.js" }
+          ]
+        },
+        {
+          "title": "后端/架构",
+          "value": "后端/架构",
+          "key": "后端/架构",
+          "selectable": false,
+          "children": [
+            { "title": "Spring Boot", "value": "Spring Boot", "key": "Spring Boot" },
+            { "title": "系统设计", "value": "系统设计", "key": "系统设计" },
+            { "title": "微服务", "value": "微服务", "key": "微服务" },
+            { "title": "分布式系统", "value": "分布式系统", "key": "分布式系统" }
+          ]
+        },
+        {
+          "title": "DevOps/云原生",
+          "value": "DevOps/云原生",
+          "key": "DevOps/云原生",
+          "selectable": false,
+          "children": [
+            { "title": "Linux", "value": "Linux", "key": "Linux" },
+            { "title": "Git", "value": "Git", "key": "Git" },
+            { "title": "CI/CD", "value": "CI/CD", "key": "CI/CD" },
+            { "title": "Docker", "value": "Docker", "key": "Docker" },
+            { "title": "Kubernetes", "value": "Kubernetes", "key": "Kubernetes" },
+            { "title": "Terraform", "value": "Terraform", "key": "Terraform" },
+            { "title": "AWS", "value": "AWS", "key": "AWS" },
+            { "title": "Azure", "value": "Azure", "key": "Azure" },
+            { "title": "GCP", "value": "GCP", "key": "GCP" }
+          ]
+        },
+        {
+          "title": "测试",
+          "value": "测试",
+          "key": "测试",
+          "selectable": false,
+          "children": [
+            { "title": "测试开发", "value": "测试开发", "key": "测试开发" },
+            { "title": "自动化测试", "value": "自动化测试", "key": "自动化测试" },
+            { "title": "性能测试", "value": "性能测试", "key": "性能测试" }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "软技能",
+      "value": "软技能",
+      "key": "软技能",
+      "selectable": false,
+      "children": [
+        {
+          "title": "方法论/模型",
+          "value": "方法论/模型",
+          "key": "方法论/模型",
+          "selectable": false,
+          "children": [
+            { "title": "4C 法课程设计", "value": "4C 法课程设计", "key": "4C 法课程设计" },
+            { "title": "GROW 模型", "value": "GROW 模型", "key": "GROW 模型" },
+            { "title": "5Why 分析法", "value": "5Why 分析法", "key": "5Why 分析法" },
+            { "title": "ORID 引导法", "value": "ORID 引导法", "key": "ORID 引导法" }
+          ]
+        },
+        { "title": "引导", "value": "引导", "key": "引导" },
+        { "title": "沟通", "value": "沟通", "key": "沟通" },
+        { "title": "教练", "value": "教练", "key": "教练" },
+        { "title": "需求分析", "value": "需求分析", "key": "需求分析" },
+        { "title": "项目管理", "value": "项目管理", "key": "项目管理" },
+        { "title": "跨团队协作", "value": "跨团队协作", "key": "跨团队协作" }
+      ]
+    }
+  ],
+  "projectTypeOptions": [
+    { "label": "咨询", "value": "咨询" },
+    { "label": "开发", "value": "开发" },
+    { "label": "测试", "value": "测试" },
+    { "label": "交付", "value": "交付" },
+    { "label": "运维", "value": "运维" },
+    { "label": "产品", "value": "产品" },
+    { "label": "其他", "value": "其他" }
+  ],
+  "techStackTreeData": [
+    {
+      "title": "前端",
+      "value": "前端",
+      "key": "前端",
+      "selectable": false,
+      "children": [
+        { "title": "Vue", "value": "Vue", "key": "Vue" },
+        { "title": "React", "value": "React", "key": "React" },
+        { "title": "TypeScript", "value": "TypeScript", "key": "TypeScript" }
+      ]
+    },
+    {
+      "title": "后端",
+      "value": "后端",
+      "key": "后端",
+      "selectable": false,
+      "children": [
+        { "title": "Java", "value": "Java", "key": "Java" },
+        { "title": "Spring Boot", "value": "Spring Boot", "key": "Spring Boot" },
+        { "title": "Go", "value": "Go", "key": "Go" },
+        { "title": "Python", "value": "Python", "key": "Python" }
+      ]
+    },
+    {
+      "title": "数据/中间件",
+      "value": "数据/中间件",
+      "key": "数据/中间件",
+      "selectable": false,
+      "children": [
+        { "title": "MySQL", "value": "MySQL", "key": "MySQL" },
+        { "title": "Redis", "value": "Redis", "key": "Redis" },
+        { "title": "Kafka", "value": "Kafka", "key": "Kafka" }
+      ]
+    },
+    {
+      "title": "DevOps",
+      "value": "DevOps",
+      "key": "DevOps",
+      "selectable": false,
+      "children": [
+        { "title": "Docker", "value": "Docker", "key": "Docker" },
+        { "title": "Kubernetes", "value": "Kubernetes", "key": "Kubernetes" },
+        { "title": "CI/CD", "value": "CI/CD", "key": "CI/CD" }
+      ]
+    },
+    {
+      "title": "分析/设计",
+      "value": "分析/设计",
+      "key": "分析/设计",
+      "selectable": false,
+      "children": [{ "title": "可视化需求分析", "value": "可视化需求分析", "key": "可视化需求分析" }]
+    }
+  ],
+  "capabilityStackOptions": [
+    { "label": "敏捷", "value": "敏捷" },
+    { "label": "Scrum", "value": "Scrum" },
+    { "label": "Kanban", "value": "Kanban" },
+    { "label": "SAFe", "value": "SAFe" },
+    { "label": "LeSS", "value": "LeSS" },
+    { "label": "DevOps", "value": "DevOps" },
+    { "label": "云原生", "value": "云原生" },
+    { "label": "SRE", "value": "SRE" },
+    { "label": "AI", "value": "AI" },
+    { "label": "大模型应用", "value": "大模型应用" },
+    { "label": "提示词工程", "value": "提示词工程" },
+    { "label": "数据分析", "value": "数据分析" },
+    { "label": "增长", "value": "增长" },
+    { "label": "合规/风控", "value": "合规/风控" }
+  ],
+  "speechLocationOptions": [
+    { "label": "线上", "value": "线上" },
+    { "label": "北京", "value": "北京" },
+    { "label": "上海", "value": "上海" },
+    { "label": "广州", "value": "广州" },
+    { "label": "深圳", "value": "深圳" },
+    { "label": "杭州", "value": "杭州" },
+    { "label": "成都", "value": "成都" },
+    { "label": "武汉", "value": "武汉" },
+    { "label": "西安", "value": "西安" },
+    { "label": "苏州", "value": "苏州" },
+    { "label": "南京", "value": "南京" },
+    { "label": "重庆", "value": "重庆" },
+    { "label": "长沙", "value": "长沙" },
+    { "label": "天津", "value": "天津" },
+    { "label": "青岛", "value": "青岛" },
+    { "label": "厦门", "value": "厦门" },
+    { "label": "海外", "value": "海外" }
+  ],
+  "certificateTreeData": [
+    {
+      "title": "Scrum/敏捷",
+      "value": "Scrum/敏捷",
+      "key": "Scrum/敏捷",
+      "selectable": false,
+      "children": [
+        {
+          "title": "Scrum Alliance",
+          "value": "Scrum Alliance",
+          "key": "Scrum Alliance",
+          "selectable": false,
+          "children": [
+            { "title": "CSM（Certified ScrumMaster）", "value": "CSM", "key": "CSM", "org": "Scrum Alliance" },
+            { "title": "CSPO（Certified Scrum Product Owner）", "value": "CSPO", "key": "CSPO", "org": "Scrum Alliance" },
+            { "title": "CSD（Certified Scrum Developer）", "value": "CSD", "key": "CSD", "org": "Scrum Alliance" },
+            { "title": "A-CSM（Advanced Certified ScrumMaster）", "value": "A-CSM", "key": "A-CSM", "org": "Scrum Alliance" },
+            { "title": "A-CSPO（Advanced Certified Scrum Product Owner）", "value": "A-CSPO", "key": "A-CSPO", "org": "Scrum Alliance" },
+            { "title": "CSP-SM（Certified Scrum Professional - SM）", "value": "CSP-SM", "key": "CSP-SM", "org": "Scrum Alliance" },
+            { "title": "CSP-PO（Certified Scrum Professional - PO）", "value": "CSP-PO", "key": "CSP-PO", "org": "Scrum Alliance" },
+            { "title": "CAL 1（Certified Agile Leadership I）", "value": "CAL 1", "key": "CAL 1", "org": "Scrum Alliance" },
+            { "title": "CAL 2（Certified Agile Leadership II）", "value": "CAL 2", "key": "CAL 2", "org": "Scrum Alliance" },
+            { "title": "CAL-E（Certified Agile Leadership - Essentials）", "value": "CAL-E", "key": "CAL-E", "org": "Scrum Alliance" }
+          ]
+        },
+        {
+          "title": "Scrum.org",
+          "value": "Scrum.org",
+          "key": "Scrum.org",
+          "selectable": false,
+          "children": [
+            { "title": "PSM（Professional Scrum Master）", "value": "PSM", "key": "PSM", "org": "Scrum.org" },
+            { "title": "PSPO（Professional Scrum Product Owner）", "value": "PSPO", "key": "PSPO", "org": "Scrum.org" }
+          ]
+        },
+        {
+          "title": "SAFe",
+          "value": "SAFe",
+          "key": "SAFe",
+          "selectable": false,
+          "children": [
+            { "title": "SAFe Agilist / Leading SAFe（SA）", "value": "SAFe SA", "key": "SAFe SA", "org": "Scaled Agile, Inc." },
+            { "title": "SAFe Scrum Master（SSM）", "value": "SAFe SSM", "key": "SAFe SSM", "org": "Scaled Agile, Inc." },
+            { "title": "SAFe Product Owner/Product Manager（POPM）", "value": "SAFe POPM", "key": "SAFe POPM", "org": "Scaled Agile, Inc." }
+          ]
+        },
+        {
+          "title": "LeSS",
+          "value": "LeSS",
+          "key": "LeSS",
+          "selectable": false,
+          "children": [{ "title": "Certified LeSS Practitioner（CLP）", "value": "LeSS CLP", "key": "LeSS CLP", "org": "LeSS Company" }]
+        }
+      ]
+    },
+    {
+      "title": "云/DevOps",
+      "value": "云/DevOps",
+      "key": "云/DevOps",
+      "selectable": false,
+      "children": [
+        {
+          "title": "AWS",
+          "value": "AWS",
+          "key": "AWS",
+          "selectable": false,
+          "children": [
+            { "title": "AWS Certified Solutions Architect – Associate", "value": "AWS SAA", "key": "AWS SAA", "org": "Amazon Web Services" },
+            { "title": "AWS Certified Developer – Associate", "value": "AWS DVA", "key": "AWS DVA", "org": "Amazon Web Services" },
+            { "title": "AWS Certified SysOps Administrator – Associate", "value": "AWS SOA", "key": "AWS SOA", "org": "Amazon Web Services" },
+            { "title": "AWS Certified Solutions Architect – Professional", "value": "AWS SAP", "key": "AWS SAP", "org": "Amazon Web Services" }
+          ]
+        },
+        {
+          "title": "Microsoft Azure",
+          "value": "Microsoft Azure",
+          "key": "Microsoft Azure",
+          "selectable": false,
+          "children": [
+            { "title": "Microsoft Certified: Azure Fundamentals (AZ-900)", "value": "AZ-900", "key": "AZ-900", "org": "Microsoft" },
+            { "title": "Microsoft Certified: Azure Administrator (AZ-104)", "value": "AZ-104", "key": "AZ-104", "org": "Microsoft" },
+            { "title": "Microsoft Certified: Azure Developer (AZ-204)", "value": "AZ-204", "key": "AZ-204", "org": "Microsoft" }
+          ]
+        },
+        {
+          "title": "Google Cloud",
+          "value": "Google Cloud",
+          "key": "Google Cloud",
+          "selectable": false,
+          "children": [
+            { "title": "Google Cloud - Associate Cloud Engineer", "value": "GCP ACE", "key": "GCP ACE", "org": "Google Cloud" },
+            { "title": "Google Cloud - Professional Cloud Architect", "value": "GCP PCA", "key": "GCP PCA", "org": "Google Cloud" }
+          ]
+        },
+        {
+          "title": "Kubernetes / CNCF",
+          "value": "Kubernetes / CNCF",
+          "key": "Kubernetes / CNCF",
+          "selectable": false,
+          "children": [
+            { "title": "Certified Kubernetes Administrator (CKA)", "value": "CKA", "key": "CKA", "org": "CNCF / Linux Foundation" },
+            { "title": "Certified Kubernetes Application Developer (CKAD)", "value": "CKAD", "key": "CKAD", "org": "CNCF / Linux Foundation" }
+          ]
+        },
+        {
+          "title": "HashiCorp",
+          "value": "HashiCorp",
+          "key": "HashiCorp",
+          "selectable": false,
+          "children": [{ "title": "HashiCorp Certified: Terraform Associate", "value": "Terraform Associate", "key": "Terraform Associate", "org": "HashiCorp" }]
+        },
+        {
+          "title": "DevOps Institute",
+          "value": "DevOps Institute",
+          "key": "DevOps Institute",
+          "selectable": false,
+          "children": [{ "title": "DevOps Foundation", "value": "DevOps Foundation", "key": "DevOps Foundation", "org": "PeopleCert / DevOps Institute" }]
+        }
+      ]
+    },
+    {
+      "title": "项目/服务管理",
+      "value": "项目/服务管理",
+      "key": "pm",
+      "selectable": false,
+      "children": [
+        { "title": "PMP", "value": "PMP", "key": "PMP", "org": "PMI" },
+        { "title": "PMI-ACP（Agile Certified Practitioner）", "value": "PMI-ACP", "key": "PMI-ACP", "org": "PMI" },
+        { "title": "ITIL 4 Foundation", "value": "ITIL 4 Foundation", "key": "ITIL 4 Foundation", "org": "PeopleCert / Axelos" }
+      ]
+    },
+    {
+      "title": "金融/风控/投研",
+      "value": "金融/风控/投研",
+      "key": "finance",
+      "selectable": false,
+      "children": [
+        { "title": "CFA（Chartered Financial Analyst）", "value": "CFA", "key": "CFA", "org": "CFA Institute" },
+        { "title": "FRM（Financial Risk Manager）", "value": "FRM", "key": "FRM", "org": "GARP" },
+        { "title": "CFP（Certified Financial Planner）", "value": "CFP", "key": "CFP", "org": "FPSB" },
+        { "title": "AFPK（Associate Financial Planner）", "value": "AFPK", "key": "AFPK", "org": "FPSB" },
+        { "title": "CISI（Investment Operations Certificate 等）", "value": "CISI", "key": "CISI", "org": "CISI" },
+        { "title": "PRM（Professional Risk Manager）", "value": "PRM", "key": "PRM", "org": "PRMIA" }
+      ]
+    },
+    {
+      "title": "业务分析（IIBA）",
+      "value": "业务分析（IIBA）",
+      "key": "iiba",
+      "selectable": false,
+      "children": [
+        { "title": "ECBA（Entry Certificate in Business Analysis）", "value": "ECBA", "key": "ECBA", "org": "IIBA" },
+        { "title": "CCBA（Certification of Capability in Business Analysis）", "value": "CCBA", "key": "CCBA", "org": "IIBA" },
+        { "title": "CBAP（Certified Business Analysis Professional）", "value": "CBAP", "key": "CBAP", "org": "IIBA" },
+        { "title": "AAC（Agile Analysis Certification）", "value": "IIBA-AAC", "key": "IIBA-AAC", "org": "IIBA" }
+      ]
+    },
+    {
+      "title": "安全/网络",
+      "value": "安全/网络",
+      "key": "sec",
+      "selectable": false,
+      "children": [
+        { "title": "CISSP", "value": "CISSP", "key": "CISSP" },
+        { "title": "CEH", "value": "CEH", "key": "CEH" },
+        { "title": "Cisco CCNA", "value": "CCNA", "key": "CCNA" },
+        { "title": "Cisco CCNP", "value": "CCNP", "key": "CCNP" }
+      ]
+    },
+    {
+      "title": "体系/过程认证",
+      "value": "体系/过程认证",
+      "key": "process",
+      "selectable": false,
+      "children": [
+        { "title": "CMMI（相关认证）", "value": "CMMI", "key": "CMMI" },
+        { "title": "ISO 9001（质量管理体系）", "value": "ISO 9001", "key": "ISO 9001" },
+        { "title": "ISO/IEC 27001（信息安全管理）", "value": "ISO 27001", "key": "ISO 27001" }
+      ]
+    },
+    {
+      "title": "国内考试/软考",
+      "value": "国内考试/软考",
+      "key": "ruankao",
+      "selectable": false,
+      "children": [
+        { "title": "软考：系统分析师", "value": "软考-系统分析师", "key": "软考-系统分析师" },
+        { "title": "软考：系统架构设计师", "value": "软考-系统架构设计师", "key": "软考-系统架构设计师" },
+        { "title": "软考：网络工程师", "value": "软考-网络工程师", "key": "软考-网络工程师" },
+        { "title": "软考：信息系统项目管理师", "value": "软考-信息系统项目管理师", "key": "软考-信息系统项目管理师" },
+        { "title": "软考：软件设计师", "value": "软考-软件设计师", "key": "软考-软件设计师" }
+      ]
+    },
+    {
+      "title": "语言/教练等能力证书",
+      "value": "语言/教练等能力证书",
+      "key": "other",
+      "selectable": false,
+      "children": [
+        { "title": "埃里克森教练认证（Erickson Coaching）", "value": "Erickson Coaching", "key": "Erickson Coaching" },
+        { "title": "托马英语证书", "value": "托马英语证书", "key": "托马英语证书" },
+        { "title": "TOEIC（托业）", "value": "TOEIC", "key": "TOEIC" },
+        { "title": "TOEFL（托福）", "value": "TOEFL", "key": "TOEFL" },
+        { "title": "IELTS（雅思）", "value": "IELTS", "key": "IELTS" }
+      ]
+    }
+  ]
+}

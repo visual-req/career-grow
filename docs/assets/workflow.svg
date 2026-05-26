@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="520" viewBox="0 0 1080 520">
+  <defs>
+    <style>
+      .title{font:700 28px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"PingFang SC","Hiragino Sans GB","Noto Sans CJK SC","Microsoft YaHei",sans-serif;fill:#0f172a}
+      .sub{font:500 14px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"PingFang SC","Hiragino Sans GB","Noto Sans CJK SC","Microsoft YaHei",sans-serif;fill:#334155}
+      .h{font:700 16px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"PingFang SC","Hiragino Sans GB","Noto Sans CJK SC","Microsoft YaHei",sans-serif;fill:#0f172a}
+      .b{font:500 13px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"PingFang SC","Hiragino Sans GB","Noto Sans CJK SC","Microsoft YaHei",sans-serif;fill:#0f172a}
+      .muted{fill:#475569}
+      .box{fill:#ffffff;stroke:#cbd5e1;stroke-width:2}
+      .chip{fill:#6366f1}
+      .chipText{font:700 14px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"PingFang SC","Hiragino Sans GB","Noto Sans CJK SC","Microsoft YaHei",sans-serif;fill:#ffffff}
+      .arrow{stroke:#94a3b8;stroke-width:3;fill:none;marker-end:url(#m)}
+    </style>
+    <marker id="m" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#94a3b8"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1080" height="520" fill="#f8fafc"/>
+  <text x="40" y="60" class="title">从 GROW 到执行：G → R → O → W</text>
+  <text x="40" y="90" class="sub">设定目标（G）→ 盘点现状（R）→ 列举选项（O）→ 筛选并落实计划（W）</text>
+
+  <g transform="translate(40,130)">
+    <rect x="0" y="0" width="1000" height="330" rx="16" class="box"/>
+  </g>
+
+  <g transform="translate(70,175)">
+    <rect x="0" y="0" width="200" height="240" rx="14" class="box"/>
+    <rect x="0" y="0" width="200" height="40" rx="14" class="chip"/>
+    <text x="14" y="26" class="chipText">G：设置目标</text>
+    <text x="14" y="76" class="h">目标清晰</text>
+    <text x="14" y="106" class="b">- 目标岗位/行业</text>
+    <text x="14" y="130" class="b">- 时间窗口</text>
+    <text x="14" y="154" class="b">- 成功标准</text>
+    <text x="14" y="188" class="b muted">产物：goals.json</text>
+  </g>
+
+  <g transform="translate(320,175)">
+    <rect x="0" y="0" width="200" height="240" rx="14" class="box"/>
+    <rect x="0" y="0" width="200" height="40" rx="14" class="chip"/>
+    <text x="14" y="26" class="chipText">R：分析现状</text>
+    <text x="14" y="76" class="h">事实与差距</text>
+    <text x="14" y="106" class="b">- 经历证据与能力</text>
+    <text x="14" y="130" class="b">- 资源与约束</text>
+    <text x="14" y="154" class="b">- 差距优先级</text>
+    <text x="14" y="188" class="b muted">产物：analysis.json</text>
+  </g>
+
+  <g transform="translate(570,175)">
+    <rect x="0" y="0" width="200" height="240" rx="14" class="box"/>
+    <rect x="0" y="0" width="200" height="40" rx="14" class="chip"/>
+    <text x="14" y="26" class="chipText">O：列举路径</text>
+    <text x="14" y="76" class="h">先广后窄</text>
+    <text x="14" y="106" class="b">- 学习路径</text>
+    <text x="14" y="130" class="b">- 作品集项目</text>
+    <text x="14" y="154" class="b">- 投递/面试训练</text>
+    <text x="14" y="188" class="b muted">产物：options 清单</text>
+  </g>
+
+  <g transform="translate(820,175)">
+    <rect x="0" y="0" width="200" height="240" rx="14" class="box"/>
+    <rect x="0" y="0" width="200" height="40" rx="14" class="chip"/>
+    <text x="14" y="26" class="chipText">W：筛选并落实</text>
+    <text x="14" y="76" class="h">执行与复盘</text>
+    <text x="14" y="106" class="b">- 筛选高杠杆选项</text>
+    <text x="14" y="130" class="b">- 里程碑/周计划</text>
+    <text x="14" y="154" class="b">- 验收与复盘</text>
+    <text x="14" y="188" class="b muted">产物：plan.json</text>
+  </g>
+
+  <path class="arrow" d="M270,300 L320,300"/>
+  <path class="arrow" d="M520,300 L570,300"/>
+  <path class="arrow" d="M770,300 L820,300"/>
+</svg>

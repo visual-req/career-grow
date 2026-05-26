@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="520" viewBox="0 0 1080 520">
+  <defs>
+    <style>
+      .title{font:700 28px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"PingFang SC","Hiragino Sans GB","Noto Sans CJK SC","Microsoft YaHei",sans-serif;fill:#0f172a}
+      .sub{font:500 14px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"PingFang SC","Hiragino Sans GB","Noto Sans CJK SC","Microsoft YaHei",sans-serif;fill:#334155}
+      .h{font:700 18px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"PingFang SC","Hiragino Sans GB","Noto Sans CJK SC","Microsoft YaHei",sans-serif;fill:#0f172a}
+      .b{font:500 14px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"PingFang SC","Hiragino Sans GB","Noto Sans CJK SC","Microsoft YaHei",sans-serif;fill:#0f172a}
+      .muted{fill:#475569}
+      .box{fill:#ffffff;stroke:#cbd5e1;stroke-width:2}
+      .chip{fill:#0ea5e9}
+      .chipText{font:700 16px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"PingFang SC","Hiragino Sans GB","Noto Sans CJK SC","Microsoft YaHei",sans-serif;fill:#ffffff}
+      .arrow{stroke:#94a3b8;stroke-width:3;fill:none;marker-end:url(#m)}
+    </style>
+    <marker id="m" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#94a3b8"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1080" height="520" fill="#f8fafc"/>
+  <text x="40" y="60" class="title">GROW 模型（用于职业发展规划对话）</text>
+  <text x="40" y="90" class="sub">把“目标 → 现状 → 选项 → 行动”串成可执行闭环</text>
+
+  <rect x="40" y="130" width="1000" height="330" rx="16" class="box"/>
+
+  <g transform="translate(70,165)">
+    <rect x="0" y="0" width="200" height="250" rx="14" class="box"/>
+    <rect x="0" y="0" width="200" height="44" rx="14" class="chip"/>
+    <text x="18" y="28" class="chipText">G — Goal 目标</text>
+    <text x="18" y="78" class="h">定义清晰终点</text>
+    <text x="18" y="108" class="b">- 目标岗位/方向</text>
+    <text x="18" y="132" class="b">- 时间窗口</text>
+    <text x="18" y="156" class="b">- 成功标准（可验证）</text>
+    <text x="18" y="180" class="b muted">例：8 周内拿到 5 次面试</text>
+  </g>
+
+  <g transform="translate(320,165)">
+    <rect x="0" y="0" width="200" height="250" rx="14" class="box"/>
+    <rect x="0" y="0" width="200" height="44" rx="14" class="chip"/>
+    <text x="18" y="28" class="chipText">R — Reality 现状</text>
+    <text x="18" y="78" class="h">盘点事实与约束</text>
+    <text x="18" y="108" class="b">- 当前能力/经历证据</text>
+    <text x="18" y="132" class="b">- 资源与限制（时间/地域）</text>
+    <text x="18" y="156" class="b">- 关键差距与优先级</text>
+    <text x="18" y="180" class="b muted">输出：差距清单</text>
+  </g>
+
+  <g transform="translate(570,165)">
+    <rect x="0" y="0" width="200" height="250" rx="14" class="box"/>
+    <rect x="0" y="0" width="200" height="44" rx="14" class="chip"/>
+    <text x="18" y="28" class="chipText">O — Options 选项</text>
+    <text x="18" y="78" class="h">生成可行路径</text>
+    <text x="18" y="108" class="b">- 项目/作品集路径</text>
+    <text x="18" y="132" class="b">- 学习路径</text>
+    <text x="18" y="156" class="b">- 投递/内推/面试训练</text>
+    <text x="18" y="180" class="b muted">先广后窄</text>
+  </g>
+
+  <g transform="translate(820,165)">
+    <rect x="0" y="0" width="200" height="250" rx="14" class="box"/>
+    <rect x="0" y="0" width="200" height="44" rx="14" class="chip"/>
+    <text x="18" y="28" class="chipText">W — Will 行动</text>
+    <text x="18" y="78" class="h">落实到执行</text>
+    <text x="18" y="108" class="b">- 里程碑与周节奏</text>
+    <text x="18" y="132" class="b">- 验收标准</text>
+    <text x="18" y="156" class="b">- 复盘与迭代机制</text>
+    <text x="18" y="180" class="b muted">输出：周计划</text>
+  </g>
+
+  <path class="arrow" d="M270,290 L320,290"/>
+  <path class="arrow" d="M520,290 L570,290"/>
+  <path class="arrow" d="M770,290 L820,290"/>
+</svg>
