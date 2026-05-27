@@ -60,10 +60,7 @@
 快速安装（npx，一次性试用）：
 
 ```bash
-npx degit visual-req/career-grow my_career
-cd my_career/frontend
-npm i
-npm run dev
+npx -y github:visual-req/career-grow -- --force
 ```
 
 启动前端（本地开发态）：

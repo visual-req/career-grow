@@ -33,8 +33,7 @@ npm run dev
 macOS / Linux（默认安装到 `~/.trae/skills/`）：
 
 ```bash
-mkdir -p ~/.trae/skills
-npx degit visual-req/career-grow ~/.trae/skills/career-grow
+npx -y github:visual-req/career-grow -- --force
 ```
 
 安装完成后重启 Trae，确保该目录下的 `car/SKILL.md` 被加载。

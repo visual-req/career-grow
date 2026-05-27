@@ -1,0 +1,13 @@
+{
+  "name": "career-grow",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Trae Skill installer for career-grow (car)",
+  "license": "MIT",
+  "bin": {
+    "career-grow": "bin/career-grow.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
