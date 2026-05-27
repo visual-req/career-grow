@@ -1,6 +1,6 @@
 ---
 name: "car"
-description: "个人职业发展助手：初始化工作目录、启动前端采集信息、分析职业规划、抓取岗位候选、生成可执行路径。Invoke when user runs /car:init /car:start /car:analyze /car:crawler /car:plan 或要求做个人职业发展规划。"
+description: "个人职业发展助手：初始化工作目录、启动前端采集信息、分析职业规划、生成可执行路径。Invoke when user runs /car:init /car:start /car:analyze /car:plan 或要求做个人职业发展规划。"
 ---
 
 # Career (car)
@@ -26,10 +26,6 @@ description: "个人职业发展助手：初始化工作目录、启动前端采
 ### /car:analyze
 
 分析现状与目标差距，输出到 `work/outputs/analysis.json`。详见 `prompts/analyze/`。
-
-### /car:crawler
-
-抓取目标相关的岗位候选信息，输出到 `work/outputs/job_candidates.json`。详见 `prompts/crawler/`。
 
 ### /car:plan
 
