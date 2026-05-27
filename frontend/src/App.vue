@@ -12,6 +12,7 @@
               <ConstraintsPage v-else-if="activeKey === 'constraints'" />
               <GoalsPage v-else-if="activeKey === 'goals'" />
               <GoalCandidatesPage v-else-if="activeKey === 'goalCandidates'" />
+              <VerificationPage v-else-if="activeKey === 'verification'" />
               <AnalysisPage v-else-if="activeKey === 'analysis'" />
               <PlanPage v-else-if="activeKey === 'plan'" />
             </a-card>
@@ -35,6 +36,7 @@ import GoalCandidatesPage from './pages/GoalCandidatesPage.vue'
 import GoalsPage from './pages/GoalsPage.vue'
 import PlanPage from './pages/PlanPage.vue'
 import ResumePage from './pages/ResumePage.vue'
+import VerificationPage from './pages/VerificationPage.vue'
 import { useCareerStore } from './store/careerStore'
 
 const store = useCareerStore()
@@ -50,12 +52,14 @@ const isResumePage = computed(() =>
     'profile',
     'hashtags',
     'skills',
+    'tools',
     'languages',
     'strengths',
     'personality',
     'education',
     'experience',
     'projects',
+    'moments',
     'artifacts',
     'awards',
     'honors',

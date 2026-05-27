@@ -147,6 +147,34 @@
     <CrudTable section="skills" :columns="store.skillsColumns" :dataSource="skillsItems" />
   </template>
 
+  <template v-else-if="activeKey === 'tools'">
+    <a-card title="工具/方法（图表与方法论）" style="margin-bottom: 12px">
+      <a-form layout="vertical">
+        <a-form-item label="快捷添加（可多选）">
+          <a-tree-select
+            v-model:value="toolsQuickSelectedModel"
+            :tree-data="store.toolkitTreeData"
+            tree-checkable
+            show-search
+            allow-clear
+            :maxTagCount="6"
+            style="width: 100%"
+            placeholder="选择工具/方法（支持搜索）"
+            tree-default-expand-all
+          />
+        </a-form-item>
+        <a-form-item label="默认熟练度">
+          <a-select v-model:value="toolsQuickLevelModel" :options="store.skillLevelOptions" />
+        </a-form-item>
+        <a-space>
+          <a-button type="primary" @click="store.addToolsSelected">添加为条目</a-button>
+          <a-typography-text type="secondary">已存在的条目会自动跳过</a-typography-text>
+        </a-space>
+      </a-form>
+    </a-card>
+    <CrudTable section="tools" :columns="store.toolsColumns" :dataSource="toolsItems" createText="新增工具/方法" />
+  </template>
+
   <template v-else-if="activeKey === 'languages'">
     <CrudTable section="languages" :columns="store.languagesColumns" :dataSource="languagesItems" />
   </template>
@@ -161,6 +189,10 @@
 
   <template v-else-if="activeKey === 'projects'">
     <CrudTable section="projects" :columns="store.projectsColumns" :dataSource="projectsItems" />
+  </template>
+
+  <template v-else-if="activeKey === 'moments'">
+    <CrudTable section="moments" :columns="store.momentsColumns" :dataSource="momentsItems" createText="新增精彩履历" />
   </template>
 
   <template v-else-if="activeKey === 'artifacts'">
@@ -461,6 +493,7 @@ const educationItems = computed(() => store.educationItems.value)
 const experienceItems = computed(() => store.experienceItems.value)
 const artifactsItems = computed(() => store.artifactsItems.value)
 const projectsItems = computed(() => store.projectsItems.value)
+const momentsItems = computed(() => store.momentsItems.value)
 const awardsItems = computed(() => store.awardsItems.value)
 const honorsItems = computed(() => store.honorsItems.value)
 const achievementsItems = computed(() => store.achievementsItems.value)
@@ -470,6 +503,7 @@ const communityItems = computed(() => store.communityItems.value)
 const socialItems = computed(() => store.socialItems.value)
 const jobIntentItems = computed(() => store.jobIntentItems.value)
 const skillsItems = computed(() => store.skillsItems.value)
+const toolsItems = computed(() => store.toolsItems.value)
 const languagesItems = computed(() => store.languagesItems.value)
 const strengthsItems = computed(() => store.strengthsItems.value)
 const weaknessesItems = computed(() => store.weaknessesItems.value)
@@ -486,6 +520,20 @@ const skillsQuickLevelModel = computed({
   get: () => store.skillsQuickLevel.value,
   set: (v: any) => {
     store.skillsQuickLevel.value = String(v ?? 'intermediate') || 'intermediate'
+  }
+})
+
+const toolsQuickSelectedModel = computed({
+  get: () => store.toolsQuickSelected.value,
+  set: (v: any) => {
+    store.toolsQuickSelected.value = Array.isArray(v) ? v : v == null ? [] : [v]
+  }
+})
+
+const toolsQuickLevelModel = computed({
+  get: () => store.toolsQuickLevel.value,
+  set: (v: any) => {
+    store.toolsQuickLevel.value = String(v ?? 'intermediate') || 'intermediate'
   }
 })
 </script>

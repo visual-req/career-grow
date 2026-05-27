@@ -1,9 +1,24 @@
 <template>
-  <a-space style="width: 100%; justify-content: flex-end">
+  <a-space style="width: 100%; justify-content: space-between" wrap>
+    <a-space wrap>
+      <a-select
+        v-model:value="historySelectedId"
+        :options="historyOptions"
+        style="min-width: 320px"
+        allow-clear
+        show-search
+        placeholder="历史分析结果"
+        :loading="analyzeHistoryLoading"
+      />
+      <a-button :loading="analyzeHistoryLoading" @click="store.loadAnalyzeHistory">刷新历史</a-button>
+      <a-button :disabled="!historySelectedId" @click="store.showAnalyzeFromHistory(historySelectedId)">加载</a-button>
+    </a-space>
     <a-button type="primary" :loading="analyzeLoading" @click="store.runAnalyze">分析</a-button>
   </a-space>
 
   <a-alert style="margin-top: 12px" type="info" message="内容由 AI 生成，请自行甄别。" show-icon />
+
+  <a-alert v-if="analyzeHistoryError" style="margin-top: 12px" type="warning" :message="`历史加载失败：${analyzeHistoryError}`" show-icon />
 
   <a-alert v-if="analyzeError" style="margin-top: 12px" type="error" :message="analyzeError" show-icon />
 
@@ -11,6 +26,17 @@
     <a-space direction="vertical" style="width: 100%; margin-top: 12px" size="middle">
       <a-space direction="vertical" style="width: 100%" size="small" v-if="analyzeResult.blocked">
         <a-alert type="warning" :message="analyzeResult.blocked?.reason ?? '信息不完整'" show-icon />
+          <a-list
+            v-if="(analyzeResult.blocked?.details ?? []).length"
+            size="small"
+            bordered
+            :dataSource="analyzeResult.blocked?.details ?? []"
+          >
+            <template #header>问题定位</template>
+            <template #renderItem="{ item }">
+              <a-list-item>{{ item }}</a-list-item>
+            </template>
+          </a-list>
         <a-space wrap v-if="missingItems.length">
           <a-button v-for="m in missingItems" :key="m" type="link" @click="goFillInfo(m)">去填写：{{ m }}</a-button>
         </a-space>
@@ -81,11 +107,137 @@
                 <a-list-item>{{ item }}</a-list-item>
               </template>
             </a-list>
+            <a-space style="margin-top: 8px">
+              <a-button type="primary" ghost @click="store.setActiveKey('verification')">去填写/更新：验证信息</a-button>
+            </a-space>
           </a-space>
         </a-collapse-panel>
 
-        <a-collapse-panel key="artifacts" header="作品分析" v-if="(analyzeResult.artifactsPanel?.insights ?? []).length">
-          <a-collapse>
+        <a-collapse-panel key="finance" header="财务分析" v-if="analyzeResult.financialPanel || analyzeResult.salaryGapPanel">
+          <a-space direction="vertical" style="width: 100%" size="small">
+            <a-space style="width: 100%; justify-content: flex-end">
+              <a-button type="primary" ghost @click="store.setActiveKey('verification')">去填写/更新：验证信息</a-button>
+            </a-space>
+
+            <a-card size="small" title="目标地区薪资与税后到手" v-if="analyzeResult.financialPanel">
+              <a-descriptions bordered size="small" :column="1">
+                <a-descriptions-item label="目标城市">{{ analyzeResult.financialPanel?.city || '-' }}</a-descriptions-item>
+                <a-descriptions-item label="目标岗位">{{ analyzeResult.financialPanel?.role || '-' }}</a-descriptions-item>
+                <a-descriptions-item label="税前主流区间（k/月）">
+                  {{
+                    analyzeResult.financialPanel?.salary?.grossMinK != null && analyzeResult.financialPanel?.salary?.grossMaxK != null
+                      ? `${analyzeResult.financialPanel.salary.grossMinK}-${analyzeResult.financialPanel.salary.grossMaxK}`
+                      : '-'
+                  }}
+                </a-descriptions-item>
+                <a-descriptions-item label="税后到手区间（k/月）">
+                  {{
+                    analyzeResult.financialPanel?.salary?.netMinK != null && analyzeResult.financialPanel?.salary?.netMaxK != null
+                      ? `${analyzeResult.financialPanel.salary.netMinK}-${analyzeResult.financialPanel.salary.netMaxK}${analyzeResult.financialPanel.salary.netEstimated ? '（估算）' : ''}`
+                      : '-'
+                  }}
+                </a-descriptions-item>
+                <a-descriptions-item label="奖金月数">
+                  {{ analyzeResult.financialPanel?.salary?.bonusMonths != null ? analyzeResult.financialPanel.salary.bonusMonths : '-' }}
+                </a-descriptions-item>
+              </a-descriptions>
+              <a-list
+                v-if="(analyzeResult.financialPanel?.salary?.sources ?? []).length"
+                size="small"
+                bordered
+                :dataSource="analyzeResult.financialPanel?.salary?.sources ?? []"
+                style="margin-top: 8px"
+              >
+                <template #header>信息来源</template>
+                <template #renderItem="{ item }">
+                  <a-list-item>{{ item }}</a-list-item>
+                </template>
+              </a-list>
+              <a-typography-paragraph v-if="analyzeResult.financialPanel?.salary?.notes" type="secondary" style="margin-top: 8px">
+                {{ analyzeResult.financialPanel?.salary?.notes }}
+              </a-typography-paragraph>
+            </a-card>
+
+            <a-card size="small" title="生活成本与可支配净收入" v-if="analyzeResult.financialPanel">
+              <a-descriptions bordered size="small" :column="1">
+                <a-descriptions-item label="生活成本合计（k/月）">
+                  {{ analyzeResult.financialPanel?.cost?.totalK != null ? analyzeResult.financialPanel.cost.totalK : '-' }}
+                </a-descriptions-item>
+                <a-descriptions-item label="扣除成本后可支配净收入（k/月）">
+                  {{
+                    analyzeResult.financialPanel?.netAfterCost?.minK != null && analyzeResult.financialPanel?.netAfterCost?.maxK != null
+                      ? `${analyzeResult.financialPanel.netAfterCost.minK}-${analyzeResult.financialPanel.netAfterCost.maxK}`
+                      : '-'
+                  }}
+                </a-descriptions-item>
+              </a-descriptions>
+              <a-list
+                v-if="(analyzeResult.financialPanel?.cost?.items ?? []).length"
+                size="small"
+                bordered
+                :dataSource="analyzeResult.financialPanel?.cost?.items ?? []"
+                style="margin-top: 8px"
+              >
+                <template #header>成本拆分</template>
+                <template #renderItem="{ item }">
+                  <a-list-item>{{ item.label }}：{{ item.k }}k/月</a-list-item>
+                </template>
+              </a-list>
+              <a-typography-paragraph v-if="analyzeResult.financialPanel?.cost?.notes" type="secondary" style="margin-top: 8px">
+                {{ analyzeResult.financialPanel?.cost?.notes }}
+              </a-typography-paragraph>
+              <a-typography-paragraph v-if="analyzeResult.financialPanel?.taxNotes" type="secondary" style="margin-top: 8px">
+                {{ analyzeResult.financialPanel?.taxNotes }}
+              </a-typography-paragraph>
+              <a-list
+                v-if="(analyzeResult.financialPanel?.issues ?? []).length"
+                size="small"
+                bordered
+                :dataSource="analyzeResult.financialPanel?.issues ?? []"
+                style="margin-top: 8px"
+              >
+                <template #header>待补齐</template>
+                <template #renderItem="{ item }">
+                  <a-list-item>{{ item }}</a-list-item>
+                </template>
+              </a-list>
+              <a-list
+                v-if="(analyzeResult.financialPanel?.recommendations ?? []).length"
+                size="small"
+                bordered
+                :dataSource="analyzeResult.financialPanel?.recommendations ?? []"
+                style="margin-top: 8px"
+              >
+                <template #header>建议</template>
+                <template #renderItem="{ item }">
+                  <a-list-item>{{ item }}</a-list-item>
+                </template>
+              </a-list>
+            </a-card>
+
+            <a-card size="small" title="当前薪资 vs 目标薪资（粗略估算）" v-if="analyzeResult.salaryGapPanel">
+              <a-typography-paragraph type="secondary">{{ analyzeResult.salaryGapPanel?.assessment ?? '' }}</a-typography-paragraph>
+              <a-list
+                v-if="(analyzeResult.salaryGapPanel?.recommendations ?? []).length"
+                size="small"
+                bordered
+                :dataSource="analyzeResult.salaryGapPanel?.recommendations ?? []"
+              >
+                <template #header>建议</template>
+                <template #renderItem="{ item }">
+                  <a-list-item>{{ item }}</a-list-item>
+                </template>
+              </a-list>
+            </a-card>
+          </a-space>
+        </a-collapse-panel>
+
+        <a-collapse-panel
+          key="artifacts"
+          header="作品分析"
+          v-if="(analyzeResult.artifactsPanel?.insights ?? []).length || (analyzeResult.artifactsPanel?.recommendedAdditions ?? []).length"
+        >
+          <a-collapse v-if="(analyzeResult.artifactsPanel?.insights ?? []).length">
             <a-collapse-panel v-for="x in analyzeResult.artifactsPanel?.insights ?? []" :key="x.id || x.name" :header="`${x.category}：${x.name || '未命名'}`">
               <a-list size="small" bordered :dataSource="x.summary ?? []" v-if="(x.summary ?? []).length">
                 <template #header>要点</template>
@@ -101,6 +253,18 @@
               </a-list>
             </a-collapse-panel>
           </a-collapse>
+          <a-list
+            v-if="(analyzeResult.artifactsPanel?.recommendedAdditions ?? []).length"
+            size="small"
+            bordered
+            :dataSource="analyzeResult.artifactsPanel?.recommendedAdditions ?? []"
+            style="margin-top: 8px"
+          >
+            <template #header>建议新增的作品/证明材料</template>
+            <template #renderItem="{ item }">
+              <a-list-item>{{ item }}</a-list-item>
+            </template>
+          </a-list>
         </a-collapse-panel>
 
         <a-collapse-panel key="personal" header="个人信息 Panel">
@@ -489,6 +653,20 @@
                   <a-list-item>{{ item }}</a-list-item>
                 </template>
               </a-list>
+              <a-list
+                size="small"
+                bordered
+                :dataSource="analyzeResult.marketStrategy?.industryFocus?.notes ?? []"
+                v-if="(analyzeResult.marketStrategy?.industryFocus?.notes ?? []).length"
+                style="margin-top: 8px"
+              >
+                <template #header>
+                  行业深耕 vs 跨行业（{{ analyzeResult.marketStrategy?.industryFocus?.status ?? '-' }}）
+                </template>
+                <template #renderItem="{ item }">
+                  <a-list-item>{{ item }}</a-list-item>
+                </template>
+              </a-list>
             </a-card>
 
             <a-card size="small" title="约束与风险" v-if="analyzeResult.riskAndConstraints">
@@ -511,6 +689,56 @@
                 </template>
               </a-list>
             </a-card>
+
+            <a-typography-title :level="5" style="margin-top: 12px">综合结论</a-typography-title>
+            <a-typography-paragraph type="secondary">{{ analyzeResult.personalPanel?.summary?.conclusion ?? '-' }}</a-typography-paragraph>
+            <a-list
+              v-if="(analyzeResult.personalPanel?.summary?.growth ?? []).length"
+              size="small"
+              bordered
+              :dataSource="analyzeResult.personalPanel?.summary?.growth ?? []"
+            >
+              <template #header>能力成长</template>
+              <template #renderItem="{ item }">
+                <a-list-item>{{ item }}</a-list-item>
+              </template>
+            </a-list>
+            <a-list
+              v-if="(analyzeResult.personalPanel?.summary?.projectExperience ?? []).length"
+              size="small"
+              bordered
+              :dataSource="analyzeResult.personalPanel?.summary?.projectExperience ?? []"
+              style="margin-top: 8px"
+            >
+              <template #header>项目经验</template>
+              <template #renderItem="{ item }">
+                <a-list-item>{{ item }}</a-list-item>
+              </template>
+            </a-list>
+            <a-list
+              v-if="analyzeResult.personalPanel?.summary?.personalitySummary"
+              size="small"
+              bordered
+              :dataSource="[analyzeResult.personalPanel?.summary?.personalitySummary]"
+              style="margin-top: 8px"
+            >
+              <template #header>性格特征</template>
+              <template #renderItem="{ item }">
+                <a-list-item>{{ item }}</a-list-item>
+              </template>
+            </a-list>
+            <a-list
+              v-if="analyzeResult.personalPanel?.summary?.toolkitSummary"
+              size="small"
+              bordered
+              :dataSource="[analyzeResult.personalPanel?.summary?.toolkitSummary]"
+              style="margin-top: 8px"
+            >
+              <template #header>工具/方法</template>
+              <template #renderItem="{ item }">
+                <a-list-item>{{ item }}</a-list-item>
+              </template>
+            </a-list>
           </a-space>
         </a-collapse-panel>
       </a-collapse>
@@ -528,6 +756,28 @@ const store = useCareerStore()
 const analyzeLoading = computed(() => store.analyzeLoading.value)
 const analyzeError = computed(() => store.analyzeError.value)
 const analyzeResult = computed(() => store.analyzeResult.value)
+const analyzeHistoryLoading = computed(() => store.analyzeHistoryLoading.value)
+const analyzeHistoryError = computed(() => store.analyzeHistoryError.value)
+const analyzeHistory = computed(() => store.analyzeHistory.value)
+
+const historySelectedId = ref<string>('')
+
+function formatHistoryLabel(x: any) {
+  const at = String(x?.generatedAt ?? x?.generatedAtUtc ?? '').trim()
+  const role = String(x?.targetRole ?? '').trim()
+  const d = at ? at.replace('T', ' ').replace('Z', '').slice(0, 16) : ''
+  const r = role || '未命名目标'
+  return d ? `${d} · ${r}` : r
+}
+
+const historyOptions = computed(() =>
+  (Array.isArray(analyzeHistory.value) ? analyzeHistory.value : [])
+    .map((x: any) => ({
+      value: String(x?.id ?? '').trim(),
+      label: formatHistoryLabel(x)
+    }))
+    .filter((x: any) => x.value)
+)
 
 const capabilityColumns = [
   { title: '维度', dataIndex: 'label', key: 'label' },
@@ -586,6 +836,20 @@ onMounted(() => {
     },
     { deep: true }
   )
+})
+
+onMounted(async () => {
+  await store.loadAnalyzeHistory()
+  const items = Array.isArray(store.analyzeHistory.value) ? store.analyzeHistory.value : []
+  if (!store.analyzeResult.value && items.length > 0) {
+    const firstId = String(items[0]?.id ?? '').trim()
+    if (firstId) {
+      historySelectedId.value = firstId
+      store.showAnalyzeFromHistory(firstId)
+      return
+    }
+  }
+  if (!store.analyzeResult.value) await store.loadLatestAnalyze()
 })
 
 onBeforeUnmount(() => {

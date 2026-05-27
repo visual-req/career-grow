@@ -31,6 +31,7 @@ const treeData = [
           { key: 'profile', title: '个人信息' },
           { key: 'hashtags', title: '标签' },
           { key: 'skills', title: '技能' },
+          { key: 'tools', title: '工具/方法' },
           { key: 'languages', title: '语言' }
         ]
       },
@@ -50,7 +51,8 @@ const treeData = [
         children: [
           { key: 'education', title: '教育履历' },
           { key: 'experience', title: '就职履历' },
-          { key: 'projects', title: '项目履历' }
+          { key: 'projects', title: '项目履历' },
+          { key: 'moments', title: '精彩履历' }
         ]
       },
       {
@@ -92,7 +94,8 @@ const treeData = [
     selectable: false,
     children: [
       { key: 'goals', title: '目标设定' },
-      { key: 'goalCandidates', title: '候选' }
+      { key: 'goalCandidates', title: '候选' },
+      { key: 'verification', title: '验证信息' }
     ]
   },
   { key: 'analysis', title: '分析' },

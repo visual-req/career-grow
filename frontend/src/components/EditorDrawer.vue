@@ -44,6 +44,9 @@
         <a-form-item label="职位">
           <a-input v-model:value="drawerModel.title" />
         </a-form-item>
+        <a-form-item label="月薪(k)">
+          <a-input-number v-model:value="drawerModel.monthlySalary" style="width: 100%" :min="0" :step="1" placeholder="例如：30 表示 30k/月" />
+        </a-form-item>
         <a-form-item label="汇报给">
           <a-input v-model:value="drawerModel.reportingTo" />
         </a-form-item>
@@ -164,6 +167,43 @@
         </a-form-item>
       </template>
 
+      <template v-else-if="drawerSection === 'moments'">
+        <a-form-item label="标题">
+          <a-input v-model:value="drawerModel.title" placeholder="一句话概括这段精彩履历" />
+        </a-form-item>
+        <a-form-item label="开始时间">
+          <a-date-picker v-model:value="drawerModel.start" picker="month" value-format="YYYY-MM" style="width: 100%" />
+        </a-form-item>
+        <a-form-item label="结束时间">
+          <a-date-picker v-model:value="drawerModel.end" picker="month" value-format="YYYY-MM" style="width: 100%" />
+        </a-form-item>
+        <a-form-item label="事件描述">
+          <a-textarea v-model:value="drawerModel.story" :rows="6" placeholder="发生了什么？你的角色是什么？目标与难点是什么？" />
+        </a-form-item>
+        <a-form-item label="亮点（每行一个要点）">
+          <a-textarea v-model:value="drawerModel.highlights" :rows="6" placeholder="例如：推动跨团队达成一致；关键指标提升；风险控制等" />
+        </a-form-item>
+        <a-form-item label="工具/方法（可多选）">
+          <a-tree-select
+            v-model:value="drawerModel.toolkit"
+            :tree-data="store.toolkitTreeData"
+            tree-checkable
+            tree-default-expand-all
+            show-search
+            allow-clear
+            :maxTagCount="8"
+            style="width: 100%"
+            placeholder="选择你采用的工具/方法"
+          />
+        </a-form-item>
+        <a-form-item label="流程/方法论细节">
+          <a-textarea v-model:value="drawerModel.process" :rows="4" placeholder="例如：如何拆解问题、推进协作、做复盘与沉淀" />
+        </a-form-item>
+        <a-form-item label="佐证（可贴链接/证据点）">
+          <a-textarea v-model:value="drawerModel.evidence" :rows="4" placeholder="例如：PRD 链接、数据看板截图说明、复盘文档、PR/Issue 等" />
+        </a-form-item>
+      </template>
+
       <template v-else-if="drawerSection === 'awards'">
         <a-form-item label="奖项">
           <a-input v-model:value="drawerModel.name" />
@@ -232,12 +272,34 @@
         </a-form-item>
       </template>
 
+      <template v-else-if="drawerSection === 'tools'">
+        <a-form-item label="工具/方法">
+          <a-tree-select
+            v-model:value="drawerModel.name"
+            :tree-data="store.toolkitTreeData"
+            tree-default-expand-all
+            show-search
+            allow-clear
+            placeholder="选择工具/方法（支持搜索）"
+          />
+        </a-form-item>
+        <a-form-item label="熟练度">
+          <a-select v-model:value="drawerModel.level" :options="store.skillLevelOptions" />
+        </a-form-item>
+        <a-form-item label="说明">
+          <a-input v-model:value="drawerModel.note" />
+        </a-form-item>
+      </template>
+
       <template v-else-if="drawerSection === 'languages'">
         <a-form-item label="语言">
           <a-auto-complete v-model:value="drawerModel.name" :options="store.languageNameOptions" placeholder="选择或输入语言" />
         </a-form-item>
         <a-form-item label="水平">
           <a-select v-model:value="drawerModel.level" :options="store.languageLevelOptions" />
+        </a-form-item>
+        <a-form-item label="证书">
+          <a-select v-model:value="drawerModel.cert" :options="store.languageCertOptions" allow-clear show-search placeholder="选择语言证书（可选）" />
         </a-form-item>
         <a-form-item label="说明">
           <a-input v-model:value="drawerModel.note" />
@@ -292,6 +354,22 @@
         </a-form-item>
         <a-form-item label="链接">
           <a-input v-model:value="drawerModel.url" />
+        </a-form-item>
+        <a-form-item label="内容标签">
+          <a-select
+            v-model:value="drawerModel.contentTags"
+            mode="tags"
+            :options="store.hashtagFlatOptions"
+            allow-clear
+            show-search
+            placeholder="输入或选择标签"
+          />
+        </a-form-item>
+        <a-form-item label="发布内容数量">
+          <a-input-number v-model:value="drawerModel.postCount" style="width: 100%" :min="0" />
+        </a-form-item>
+        <a-form-item label="关注者数量">
+          <a-input-number v-model:value="drawerModel.followerCount" style="width: 100%" :min="0" />
         </a-form-item>
         <a-form-item label="备注">
           <a-textarea v-model:value="drawerModel.note" :rows="3" />

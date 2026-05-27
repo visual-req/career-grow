@@ -148,6 +148,15 @@
     { "label": "流利", "value": "fluent" },
     { "label": "母语", "value": "native" }
   ],
+  "languageCertOptions": [
+    { "label": "CET-4", "value": "CET-4" },
+    { "label": "CET-6", "value": "CET-6" },
+    { "label": "TOEFL", "value": "TOEFL" },
+    { "label": "IELTS", "value": "IELTS" },
+    { "label": "JLPT-1", "value": "JLPT-1" },
+    { "label": "JLPT-2", "value": "JLPT-2" },
+    { "label": "JLPT-3", "value": "JLPT-3" }
+  ],
   "personalityOptions": [
     { "label": "抗压能力强", "value": "抗压能力强" },
     { "label": "抗压能力一般", "value": "抗压能力一般" },
@@ -160,7 +169,17 @@
     { "label": "偏好与人打交道", "value": "偏好与人打交道" },
     { "label": "偏好与机器打交道", "value": "偏好与机器打交道" },
     { "label": "偏好内勤", "value": "偏好内勤" },
-    { "label": "偏好外勤", "value": "偏好外勤" }
+    { "label": "偏好外勤", "value": "偏好外勤" },
+    { "label": "偏好管理", "value": "偏好管理" },
+    { "label": "偏好研究", "value": "偏好研究" },
+    { "label": "偏好听命令执行", "value": "偏好听命令执行" },
+    { "label": "擅长表达", "value": "擅长表达" },
+    { "label": "不擅长表达", "value": "不擅长表达" },
+    { "label": "坚持自己想法", "value": "坚持自己想法" },
+    { "label": "容易动摇想法", "value": "容易动摇想法" },
+    { "label": "积极掌握新技术", "value": "积极掌握新技术" },
+    { "label": "被动掌握新技术", "value": "被动掌握新技术" },
+    { "label": "对新技术毫不感兴趣", "value": "对新技术毫不感兴趣" }
   ],
   "strengthsQuickOptions": [
     { "label": "结构化思维", "value": "结构化思维" },
@@ -612,6 +631,150 @@
         { "title": "TOEIC（托业）", "value": "TOEIC", "key": "TOEIC" },
         { "title": "TOEFL（托福）", "value": "TOEFL", "key": "TOEFL" },
         { "title": "IELTS（雅思）", "value": "IELTS", "key": "IELTS" }
+      ]
+    }
+  ],
+  "toolkitOptions": [
+    { "label": "图表：思维导图", "value": "思维导图", "category": "图表" },
+    { "label": "图表：流程图", "value": "流程图", "category": "图表" },
+    { "label": "图表：泳道图", "value": "泳道图", "category": "图表" },
+    { "label": "图表：时间轴图", "value": "时间轴图", "category": "图表" },
+    { "label": "图表：用户旅程图", "value": "用户旅程图", "category": "图表" },
+    { "label": "图表：用户画像", "value": "用户画像", "category": "图表" },
+    { "label": "图表：甘特图", "value": "甘特图", "category": "图表" },
+    { "label": "图表：WBS（工作分解结构）", "value": "WBS", "category": "图表" },
+    { "label": "图表：看板", "value": "看板", "category": "图表" },
+    { "label": "图表：燃尽图", "value": "燃尽图", "category": "图表" },
+    { "label": "图表：系统架构图", "value": "系统架构图", "category": "图表" },
+    { "label": "图表：ER 图/数据模型图", "value": "ER 图", "category": "图表" },
+    { "label": "图表：数据流图（DFD）", "value": "数据流图（DFD）", "category": "图表" },
+    { "label": "图表：状态机图", "value": "状态机图", "category": "图表" },
+    { "label": "图表：序列图", "value": "序列图", "category": "图表" },
+    { "label": "图表：RACI 矩阵", "value": "RACI 矩阵", "category": "图表" },
+    { "label": "产品：PRD 模板", "value": "PRD 模板", "category": "产品" },
+    { "label": "产品：产品路线图", "value": "产品路线图", "category": "产品" },
+    { "label": "产品：竞品分析框架", "value": "竞品分析框架", "category": "产品" },
+    { "label": "产品：用户故事地图", "value": "用户故事地图", "category": "产品" },
+    { "label": "产品：需求优先级（RICE/ICE）", "value": "需求优先级（RICE/ICE）", "category": "产品" },
+    { "label": "产品：产品定位", "value": "产品定位", "category": "产品" },
+    { "label": "产品：设计思维", "value": "设计思维", "category": "产品" },
+    { "label": "产品：信息架构", "value": "信息架构", "category": "产品" },
+    { "label": "产品：Kano 模型", "value": "Kano 模型", "category": "产品" },
+    { "label": "产品：JTBD", "value": "JTBD", "category": "产品" },
+    { "label": "产品：AARRR 漏斗", "value": "AARRR 漏斗", "category": "产品" },
+    { "label": "产品：北极星指标（NSM）", "value": "北极星指标", "category": "产品" },
+    { "label": "产品：埋点方案/事件模型", "value": "埋点方案/事件模型", "category": "产品" },
+    { "label": "项目管理：里程碑计划", "value": "里程碑计划", "category": "项目管理" },
+    { "label": "项目管理：风险清单", "value": "风险清单", "category": "项目管理" },
+    { "label": "项目管理：RAID 日志", "value": "RAID 日志", "category": "项目管理" },
+    { "label": "项目管理：关键路径（CPM）", "value": "关键路径（CPM）", "category": "项目管理" },
+    { "label": "方法论：波特五力模型", "value": "波特五力模型", "category": "方法论" },
+    { "label": "方法论：PEST 分析", "value": "PEST 分析", "category": "方法论" },
+    { "label": "方法论：5 Why", "value": "5 Why", "category": "方法论" },
+    { "label": "方法论：ORID", "value": "ORID", "category": "方法论" },
+    { "label": "方法论：GROW", "value": "GROW", "category": "方法论" },
+    { "label": "方法论：SWOT", "value": "SWOT", "category": "方法论" },
+    { "label": "方法论：SMART", "value": "SMART", "category": "方法论" },
+    { "label": "方法论：MECE", "value": "MECE", "category": "方法论" },
+    { "label": "方法论：PDCA", "value": "PDCA", "category": "方法论" },
+    { "label": "方法论：OKR", "value": "OKR", "category": "方法论" },
+    { "label": "教练：刻度尺", "value": "刻度尺", "category": "教练" },
+    { "label": "教练：平衡轮", "value": "平衡轮", "category": "教练" },
+    { "label": "教练：迪士尼法", "value": "迪士尼法", "category": "教练" },
+    { "label": "教练：多视角法", "value": "多视角法", "category": "教练" },
+    { "label": "教练：假设法", "value": "假设法", "category": "教练" },
+    { "label": "教练：目标导向法", "value": "目标导向法", "category": "教练" },
+    { "label": "教练：逻辑层次", "value": "逻辑层次", "category": "教练" }
+  ],
+  "toolkitTreeData": [
+    {
+      "title": "图表",
+      "value": "图表",
+      "key": "toolkit_chart",
+      "selectable": false,
+      "children": [
+        { "title": "思维导图", "value": "思维导图", "key": "思维导图", "category": "图表" },
+        { "title": "流程图", "value": "流程图", "key": "流程图", "category": "图表" },
+        { "title": "泳道图", "value": "泳道图", "key": "泳道图", "category": "图表" },
+        { "title": "时间轴图", "value": "时间轴图", "key": "时间轴图", "category": "图表" },
+        { "title": "用户旅程图", "value": "用户旅程图", "key": "用户旅程图", "category": "图表" },
+        { "title": "用户画像", "value": "用户画像", "key": "用户画像", "category": "图表" },
+        { "title": "甘特图", "value": "甘特图", "key": "甘特图", "category": "图表" },
+        { "title": "WBS（工作分解结构）", "value": "WBS", "key": "WBS", "category": "图表" },
+        { "title": "看板", "value": "看板", "key": "看板", "category": "图表" },
+        { "title": "燃尽图", "value": "燃尽图", "key": "燃尽图", "category": "图表" },
+        { "title": "系统架构图", "value": "系统架构图", "key": "系统架构图", "category": "图表" },
+        { "title": "ER 图/数据模型图", "value": "ER 图", "key": "ER 图", "category": "图表" },
+        { "title": "数据流图（DFD）", "value": "数据流图（DFD）", "key": "数据流图（DFD）", "category": "图表" },
+        { "title": "状态机图", "value": "状态机图", "key": "状态机图", "category": "图表" },
+        { "title": "序列图", "value": "序列图", "key": "序列图", "category": "图表" },
+        { "title": "RACI 矩阵", "value": "RACI 矩阵", "key": "RACI 矩阵", "category": "图表" }
+      ]
+    },
+    {
+      "title": "产品",
+      "value": "产品",
+      "key": "toolkit_product",
+      "selectable": false,
+      "children": [
+        { "title": "PRD 模板", "value": "PRD 模板", "key": "PRD 模板", "category": "产品" },
+        { "title": "产品路线图", "value": "产品路线图", "key": "产品路线图", "category": "产品" },
+        { "title": "竞品分析框架", "value": "竞品分析框架", "key": "竞品分析框架", "category": "产品" },
+        { "title": "用户故事地图", "value": "用户故事地图", "key": "用户故事地图", "category": "产品" },
+        { "title": "需求优先级（RICE/ICE）", "value": "需求优先级（RICE/ICE）", "key": "需求优先级（RICE/ICE）", "category": "产品" },
+        { "title": "产品定位", "value": "产品定位", "key": "产品定位", "category": "产品" },
+        { "title": "设计思维", "value": "设计思维", "key": "设计思维", "category": "产品" },
+        { "title": "信息架构", "value": "信息架构", "key": "信息架构", "category": "产品" },
+        { "title": "Kano 模型", "value": "Kano 模型", "key": "Kano 模型", "category": "产品" },
+        { "title": "JTBD", "value": "JTBD", "key": "JTBD", "category": "产品" },
+        { "title": "AARRR 漏斗", "value": "AARRR 漏斗", "key": "AARRR 漏斗", "category": "产品" },
+        { "title": "北极星指标（NSM）", "value": "北极星指标", "key": "北极星指标", "category": "产品" },
+        { "title": "埋点方案/事件模型", "value": "埋点方案/事件模型", "key": "埋点方案/事件模型", "category": "产品" }
+      ]
+    },
+    {
+      "title": "项目管理",
+      "value": "项目管理",
+      "key": "toolkit_pm",
+      "selectable": false,
+      "children": [
+        { "title": "里程碑计划", "value": "里程碑计划", "key": "里程碑计划", "category": "项目管理" },
+        { "title": "风险清单", "value": "风险清单", "key": "风险清单", "category": "项目管理" },
+        { "title": "RAID 日志", "value": "RAID 日志", "key": "RAID 日志", "category": "项目管理" },
+        { "title": "关键路径（CPM）", "value": "关键路径（CPM）", "key": "关键路径（CPM）", "category": "项目管理" }
+      ]
+    },
+    {
+      "title": "方法论",
+      "value": "方法论",
+      "key": "toolkit_method",
+      "selectable": false,
+      "children": [
+        { "title": "波特五力模型", "value": "波特五力模型", "key": "波特五力模型", "category": "方法论" },
+        { "title": "PEST 分析", "value": "PEST 分析", "key": "PEST 分析", "category": "方法论" },
+        { "title": "5 Why", "value": "5 Why", "key": "5 Why", "category": "方法论" },
+        { "title": "ORID", "value": "ORID", "key": "ORID", "category": "方法论" },
+        { "title": "GROW", "value": "GROW", "key": "GROW", "category": "方法论" },
+        { "title": "SWOT", "value": "SWOT", "key": "SWOT", "category": "方法论" },
+        { "title": "SMART", "value": "SMART", "key": "SMART", "category": "方法论" },
+        { "title": "MECE", "value": "MECE", "key": "MECE", "category": "方法论" },
+        { "title": "PDCA", "value": "PDCA", "key": "PDCA", "category": "方法论" },
+        { "title": "OKR", "value": "OKR", "key": "OKR", "category": "方法论" }
+      ]
+    },
+    {
+      "title": "教练",
+      "value": "教练",
+      "key": "toolkit_coach",
+      "selectable": false,
+      "children": [
+        { "title": "刻度尺", "value": "刻度尺", "key": "刻度尺", "category": "教练" },
+        { "title": "平衡轮", "value": "平衡轮", "key": "平衡轮", "category": "教练" },
+        { "title": "迪士尼法", "value": "迪士尼法", "key": "迪士尼法", "category": "教练" },
+        { "title": "多视角法", "value": "多视角法", "key": "多视角法", "category": "教练" },
+        { "title": "假设法", "value": "假设法", "key": "假设法", "category": "教练" },
+        { "title": "目标导向法", "value": "目标导向法", "key": "目标导向法", "category": "教练" },
+        { "title": "逻辑层次", "value": "逻辑层次", "key": "逻辑层次", "category": "教练" }
       ]
     }
   ]

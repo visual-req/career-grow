@@ -7,6 +7,7 @@
       <template v-if="column.key === 'actions'">
         <a-space>
           <a-button v-if="section === 'artifacts'" size="small" @click="openDetail(record)">详情</a-button>
+          <a-button v-else-if="section === 'experience' || section === 'projects' || section === 'moments'" size="small" @click="openDetail(record)">详情</a-button>
           <a-button size="small" @click="store.openEdit(section, record)">编辑</a-button>
           <a-popconfirm title="确定删除？" @confirm="store.removeRecord(section, record.id)">
             <a-button size="small" danger>删除</a-button>
@@ -59,6 +60,18 @@ const detailTitle = computed(() => {
     const name = String(detailRecord.value?.name ?? '').trim()
     return name ? `作品详情：${name}` : '作品详情'
   }
+  if (props.section === 'experience') {
+    const name = String(detailRecord.value?.company ?? '').trim()
+    return name ? `履历详情：${name}` : '履历详情'
+  }
+  if (props.section === 'projects') {
+    const name = String(detailRecord.value?.name ?? '').trim()
+    return name ? `项目详情：${name}` : '项目详情'
+  }
+  if (props.section === 'moments') {
+    const name = String(detailRecord.value?.title ?? '').trim()
+    return name ? `精彩履历：${name}` : '精彩履历'
+  }
   return '详情'
 })
 
@@ -100,6 +113,46 @@ const detailFields = computed(() => {
       { key: 'publishedAt', label: '发表日期' },
       { key: 'link', label: '链接' },
       { key: 'note', label: '说明' }
+    ]
+  }
+  if (props.section === 'experience') {
+    return [
+      { key: 'company', label: '公司' },
+      { key: 'companyType', label: '公司类型' },
+      { key: 'title', label: '职位' },
+      { key: 'monthlySalary', label: '月薪(k)' },
+      { key: 'reportingTo', label: '汇报给' },
+      { key: 'managedCount', label: '管理人数' },
+      { key: 'location', label: '地点' },
+      { key: 'start', label: '开始时间' },
+      { key: 'end', label: '结束时间' },
+      { key: 'highlights', label: '亮点' }
+    ]
+  }
+  if (props.section === 'projects') {
+    return [
+      { key: 'name', label: '项目名' },
+      { key: 'pitch', label: '定位' },
+      { key: 'industry', label: '行业' },
+      { key: 'type', label: '类型' },
+      { key: 'techStack', label: '技术栈' },
+      { key: 'capabilityStack', label: '能力栈' },
+      { key: 'start', label: '开始时间' },
+      { key: 'end', label: '结束时间' },
+      { key: 'link', label: '链接' },
+      { key: 'highlights', label: '亮点' }
+    ]
+  }
+  if (props.section === 'moments') {
+    return [
+      { key: 'title', label: '标题' },
+      { key: 'start', label: '开始时间' },
+      { key: 'end', label: '结束时间' },
+      { key: 'story', label: '事件描述' },
+      { key: 'highlights', label: '亮点' },
+      { key: 'toolkit', label: '工具/方法' },
+      { key: 'process', label: '流程/方法论' },
+      { key: 'evidence', label: '佐证' }
     ]
   }
   return []

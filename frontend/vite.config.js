@@ -204,6 +204,45 @@ export default defineConfig({
           res.end(JSON.stringify({ error: 'Method Not Allowed' }))
         })
 
+        server.middlewares.use('/api/artifacts', async (req, res) => {
+          const repoRoot = path.resolve(__dirname, '..')
+          const artifactsDir = path.join(repoRoot, 'work', 'artifacts')
+          const name = safeJsonName(decodeURIComponent(String(req.url ?? '').replace(/^\//, '').split('?')[0] ?? ''))
+          if (!name) {
+            res.statusCode = 400
+            res.setHeader('Content-Type', 'application/json; charset=utf-8')
+            res.end(JSON.stringify({ error: 'Invalid file name' }))
+            return
+          }
+          const filePath = path.join(artifactsDir, name)
+          if (req.method === 'GET') {
+            const data = await readJsonFile(filePath, null)
+            res.statusCode = 200
+            res.setHeader('Content-Type', 'application/json; charset=utf-8')
+            res.end(JSON.stringify(data))
+            return
+          }
+          if (req.method === 'POST' || req.method === 'PUT') {
+            try {
+              const raw = await readBody(req)
+              const data = raw ? JSON.parse(raw) : null
+              await fs.mkdir(artifactsDir, { recursive: true })
+              await fs.writeFile(filePath, JSON.stringify(data ?? null, null, 2), 'utf-8')
+              res.statusCode = 200
+              res.setHeader('Content-Type', 'application/json; charset=utf-8')
+              res.end(JSON.stringify({ ok: true }))
+            } catch (e) {
+              res.statusCode = 400
+              res.setHeader('Content-Type', 'application/json; charset=utf-8')
+              res.end(JSON.stringify({ error: 'Bad Request', message: String(e?.message ?? e) }))
+            }
+            return
+          }
+          res.statusCode = 405
+          res.setHeader('Content-Type', 'application/json; charset=utf-8')
+          res.end(JSON.stringify({ error: 'Method Not Allowed' }))
+        })
+
         server.middlewares.use('/api/crawl', async (req, res) => {
           if (req.method !== 'POST') {
             res.statusCode = 405
@@ -216,6 +255,7 @@ export default defineConfig({
             const repoRoot = path.resolve(__dirname, '..')
             const inputsDir = path.join(repoRoot, 'work', 'inputs')
             const outputsDir = path.join(repoRoot, 'work', 'outputs')
+            const artifactsDir = path.join(repoRoot, 'work', 'artifacts')
 
             const goals = (await readJsonFile(path.join(inputsDir, 'goals.json'), {})) ?? {}
             const jobIntent = (await readJsonFile(path.join(inputsDir, 'job_intent.json'), { items: [] })) ?? { items: [] }
@@ -277,16 +317,37 @@ export default defineConfig({
             return
           }
 
+          const toIsoWithOffset = (d) => {
+            const pad = (n) => String(n).padStart(2, '0')
+            const y = d.getFullYear()
+            const m = pad(d.getMonth() + 1)
+            const day = pad(d.getDate())
+            const hh = pad(d.getHours())
+            const mm = pad(d.getMinutes())
+            const ss = pad(d.getSeconds())
+            const offMin = -d.getTimezoneOffset()
+            const sign = offMin >= 0 ? '+' : '-'
+            const abs = Math.abs(offMin)
+            const offH = pad(Math.floor(abs / 60))
+            const offM = pad(abs % 60)
+            return `${y}-${m}-${day}T${hh}:${mm}:${ss}${sign}${offH}:${offM}`
+          }
+
+          const requestAtUtc = new Date().toISOString()
+          const requestAtLocal = toIsoWithOffset(new Date())
+          let stage = 'init'
           try {
             const repoRoot = path.resolve(__dirname, '..')
             const inputsDir = path.join(repoRoot, 'work', 'inputs')
             const outputsDir = path.join(repoRoot, 'work', 'outputs')
+            const artifactsDir = path.join(repoRoot, 'work', 'artifacts')
 
             async function readJson(file) {
               const filePath = path.join(inputsDir, file)
               return readJsonFile(filePath, null)
             }
 
+            stage = 'read_inputs'
             const profile = (await readJson('profile.json')) ?? {}
             const education = (await readJson('education.json')) ?? { items: [] }
             const experience = (await readJson('experience.json')) ?? { items: [] }
@@ -300,14 +361,17 @@ export default defineConfig({
             const strengths = (await readJson('strengths.json')) ?? { items: [] }
             const weaknesses = (await readJson('weaknesses.json')) ?? { items: [] }
             const skills = (await readJson('skills.json')) ?? { items: [] }
+            const tools = (await readJson('tools.json')) ?? { items: [] }
             const languages = (await readJson('languages.json')) ?? { items: [] }
             const hashtag = (await readJson('hashtag.json')) ?? { selected: [] }
             const goals = (await readJson('goals.json')) ?? {}
             const constraints = (await readJson('constraints.json')) ?? {}
             const jobIntent = (await readJson('job_intent.json')) ?? { items: [] }
             const personality = (await readJson('personality.json')) ?? { items: [] }
+            const verification = (await readJson('verification.json')) ?? {}
 
-            const now = new Date().toISOString()
+            const now = requestAtLocal
+            const nowUtc = requestAtUtc
 
             function truthyString(v) {
               return typeof v === 'string' && v.trim().length > 0
@@ -328,6 +392,64 @@ export default defineConfig({
             const timeWindow = String(goals?.timeWindow ?? '').trim()
             const successCriteria = String(goals?.successCriteria ?? '').trim()
             const salaryExpectation = salaries.join(' / ')
+
+            const salaryGapPanel = (() => {
+              stage = 'salary_gap'
+              const expItems = Array.isArray(experience?.items) ? experience.items : []
+              const parseMonth = (s) => {
+                const raw = String(s ?? '').trim()
+                if (!raw) return NaN
+                const m = raw.match(/^(\d{4})-(\d{2})/)
+                if (!m) return NaN
+                const y = Number(m[1])
+                const mm = Number(m[2])
+                if (!Number.isFinite(y) || !Number.isFinite(mm)) return NaN
+                return y * 100 + mm
+              }
+              const latest = expItems
+                .map((x) => ({ x, endKey: parseMonth(x?.end) || parseMonth(x?.start) }))
+                .sort((a, b) => (b.endKey || 0) - (a.endKey || 0))[0]?.x
+              const currentMonthlySalary =
+                latest && typeof latest?.monthlySalary === 'number' && Number.isFinite(latest.monthlySalary) ? latest.monthlySalary : null
+
+              const parseSalaryToK = (s) => {
+                const raw = String(s ?? '').trim()
+                if (!raw) return null
+                const m = raw.match(/(\d+(\.\d+)?)/)
+                if (!m) return null
+                const n = Number(m[1])
+                if (!Number.isFinite(n)) return null
+                const baseK = /万|w/i.test(raw) ? n * 10 : /k/i.test(raw) ? n : n
+                if (/年|\/y|year/i.test(raw)) return Number((baseK / 12).toFixed(1))
+                return baseK
+              }
+              const targetMonthlySalaryK = parseSalaryToK(salaryExpectation)
+
+              const gapK =
+                currentMonthlySalary != null && targetMonthlySalaryK != null ? Number((targetMonthlySalaryK - currentMonthlySalary).toFixed(1)) : null
+
+              const assessment =
+                gapK == null
+                  ? '信息不足：请在就职履历填写月薪，并在目标条目填写目标薪资（如 30k/3w/3万）'
+                  : gapK <= 0
+                    ? '当前薪资已达到或超过目标薪资区间（仍建议结合岗位要求与成长空间综合判断）'
+                    : `目标月薪与当前月薪差距约 ${gapK}k（按目标 ${targetMonthlySalaryK}k - 当前 ${currentMonthlySalary}k 估算）`
+
+              const recommendations = gapK == null ? [] : gapK <= 0 ? ['把优势转成可量化成果与岗位匹配证据，争取更高档位或更优权益'] : [
+                    '用能力映射表锁定 3 个最大能力差距，优先做项目化补齐并形成证据（作品/复盘/指标）',
+                    '准备谈薪策略：现薪→期望→理由（市场对标/能力证据/贡献预期）与底线/备选方案',
+                    '补齐“可证明的成果”：提升面试通过率与议价空间（影响范围、指标提升、成本节省）'
+                  ]
+
+              return {
+                currentMonthlySalaryK: currentMonthlySalary,
+                targetMonthlySalaryText: salaryExpectation,
+                targetMonthlySalaryK,
+                gapK,
+                assessment,
+                recommendations
+              }
+            })()
 
             const missingProfileFields = [
               !truthyString(profileBasics?.name) ? '姓名' : null,
@@ -404,6 +526,7 @@ export default defineConfig({
             }))
 
             const artifactInsights = (() => {
+              stage = 'artifact_insights'
               const items = Array.isArray(artifacts?.items) ? artifacts.items : []
               const normalizeType = (t) => String(t ?? '').trim()
               const kind = (t) => {
@@ -573,6 +696,86 @@ export default defineConfig({
               ].filter(Boolean)
             })
 
+            const vTarget = verification?.target ?? {}
+            const vSalary = verification?.salary ?? {}
+            const vCost = verification?.cost ?? {}
+            const vTax = verification?.tax ?? {}
+
+            const verifyCity = String(vTarget?.city ?? intentLocation ?? '').trim()
+            const verifyRole = String(vTarget?.role ?? '').trim() || targetRole
+
+            const grossMinK = num(vSalary?.grossMinK)
+            const grossMaxK = num(vSalary?.grossMaxK)
+            const netMinK = num(vSalary?.netMinK)
+            const netMaxK = num(vSalary?.netMaxK)
+            const bonusMonths = num(vSalary?.bonusMonths)
+            const salarySources = Array.isArray(vSalary?.sources) ? vSalary.sources.map((x) => String(x ?? '').trim()).filter(Boolean) : []
+
+            const rentK = num(vCost?.rentK)
+            const commuteK = num(vCost?.commuteK)
+            const foodK = num(vCost?.foodK)
+            const otherK = num(vCost?.otherK)
+            const costItems = [
+              rentK != null ? { key: 'rent', label: '房租', k: rentK } : null,
+              commuteK != null ? { key: 'commute', label: '通勤', k: commuteK } : null,
+              foodK != null ? { key: 'food', label: '餐饮', k: foodK } : null,
+              otherK != null ? { key: 'other', label: '其他', k: otherK } : null
+            ].filter(Boolean)
+            const costTotalK = costItems.length ? Number(costItems.reduce((acc, x) => acc + Number(x.k || 0), 0).toFixed(2)) : null
+
+            let usedNetMinK = netMinK
+            let usedNetMaxK = netMaxK
+            let usedNetEstimated = false
+            if (usedNetMinK == null && usedNetMaxK == null && grossMinK != null && grossMaxK != null) {
+              usedNetEstimated = true
+              usedNetMinK = Number((grossMinK * 0.75).toFixed(1))
+              usedNetMaxK = Number((grossMaxK * 0.75).toFixed(1))
+            }
+
+            const afterCostMinK = usedNetMinK != null && costTotalK != null ? Number((usedNetMinK - costTotalK).toFixed(1)) : null
+            const afterCostMaxK = usedNetMaxK != null && costTotalK != null ? Number((usedNetMaxK - costTotalK).toFixed(1)) : null
+
+            const financialIssues = []
+            if (!verifyCity) financialIssues.push('未填写目标城市（验证信息）')
+            if (grossMinK == null || grossMaxK == null) financialIssues.push('未填写税前主流薪资区间（验证信息）')
+            if (costTotalK == null) financialIssues.push('未填写生活成本估算（验证信息）')
+            const targetK = typeof salaryGapPanel?.targetMonthlySalaryK === 'number' && Number.isFinite(salaryGapPanel.targetMonthlySalaryK) ? salaryGapPanel.targetMonthlySalaryK : null
+            if (targetK != null && grossMinK != null && grossMaxK != null) {
+              if (targetK > grossMaxK * 1.3) financialIssues.push(`目标薪资（约 ${targetK}k/月）明显高于该城市该岗位主流区间上沿（${grossMaxK}k/月），需要用职级/岗位范围重新对齐`)
+              if (targetK < grossMinK * 0.7) financialIssues.push(`目标薪资（约 ${targetK}k/月）明显低于该城市该岗位主流区间下沿（${grossMinK}k/月），建议核对口径（税前/税后、年包/月薪）`)
+            }
+
+            const financialPanel = {
+              city: verifyCity,
+              role: verifyRole,
+              salary: {
+                grossMinK,
+                grossMaxK,
+                netMinK: usedNetMinK,
+                netMaxK: usedNetMaxK,
+                netEstimated: usedNetEstimated,
+                bonusMonths,
+                sources: salarySources,
+                notes: String(vSalary?.notes ?? '').trim()
+              },
+              cost: {
+                items: costItems,
+                totalK: costTotalK,
+                notes: String(vCost?.notes ?? '').trim()
+              },
+              netAfterCost: {
+                minK: afterCostMinK,
+                maxK: afterCostMaxK
+              },
+              taxNotes: String(vTax?.notes ?? '').trim(),
+              issues: financialIssues,
+              recommendations: [
+                '把“主流薪资区间”与“税后到手”拆清楚：是否含奖金/补贴/加班/期权、按 12/13/14 薪、社保公积金口径',
+                '把生活成本拆到可复核：房租/通勤/餐饮/保险/一次性搬家成本，并写清假设（独居/合租、通勤方式等）',
+                '用职级对齐校准：该薪资在该城市该岗位通常对应的职级（P 序列/M 序列）是什么？'
+              ]
+            }
+
             const goalValue = completenessBlocked
               ? null
               : {
@@ -581,8 +784,12 @@ export default defineConfig({
                     : '建议明确目标对你的长期价值，并把关键外部因素（地域/家庭/保障/风险）纳入评估。',
                   factors: valueFactors,
                   questionsToVerify: [
-                    '目标岗位在目标地区的主流薪资区间与税后到手是多少？',
-                    '该地区的生活成本与汇率波动对净收入的影响如何？',
+                    grossMinK != null && grossMaxK != null
+                      ? `目标岗位在目标地区的主流薪资区间：税前 ${grossMinK}-${grossMaxK}k/月${usedNetMinK != null && usedNetMaxK != null ? `，税后到手 ${usedNetMinK}-${usedNetMaxK}k/月${usedNetEstimated ? '（估算）' : ''}` : ''}`
+                      : '目标岗位在目标地区的主流薪资区间与税后到手是多少？（去“验证信息”填写）',
+                    costTotalK != null && afterCostMinK != null && afterCostMaxK != null
+                      ? `生活成本估算：约 ${costTotalK}k/月，扣除后可支配净收入约 ${afterCostMinK}-${afterCostMaxK}k/月`
+                      : '该地区的生活成本与汇率波动对净收入的影响如何？（去“验证信息”填写）',
                     '目标岗位对语言与学历/经验门槛是什么？你目前差多少？',
                     '家庭与社保的迁移/中断成本是否在可接受范围？'
                   ]
@@ -671,6 +878,17 @@ export default defineConfig({
               const role = String(targetRole ?? '').trim()
               const recProjects = []
               const recRoles = ['核心贡献者（Owner）', '需求拆解/方案负责人', '交付与质量守门人']
+              const targetK = typeof salaryGapPanel?.targetMonthlySalaryK === 'number' && Number.isFinite(salaryGapPanel.targetMonthlySalaryK) ? salaryGapPanel.targetMonthlySalaryK : null
+              if (targetK != null) {
+                if (targetK >= 80) {
+                  if (/开发|后端|前端|工程师|程序/i.test(role)) recRoles.unshift('技术负责人/架构负责人（对标高薪资）')
+                  else if (/产品|PM/i.test(role)) recRoles.unshift('产品负责人/增长负责人（对标高薪资）')
+                  else if (/测试|QA|质量/i.test(role)) recRoles.unshift('质量负责人/测试负责人（对标高薪资）')
+                  else recRoles.unshift('负责人/专家路径（对标高薪资）')
+                } else if (targetK >= 60) {
+                  recRoles.unshift('资深/专家路径（对标目标薪资）')
+                }
+              }
               if (/测试|QA|质量/i.test(role)) {
                 recProjects.push('质量工程/测试平台：自动化、CI/CD 质量门禁、缺陷治理')
                 recProjects.push('效率工程：覆盖率、回归时间、发布频率、故障率等指标驱动改进')
@@ -854,6 +1072,7 @@ export default defineConfig({
             })()
 
             const languageAbilityAdvice = (() => {
+              stage = 'language_advice'
               const items = Array.isArray(languages?.items) ? languages.items : []
               const normalizeName = (x) => String(x?.name ?? x?.customName ?? '').trim()
               const normalizeLevel = (x) => String(x?.level ?? '').trim()
@@ -900,6 +1119,7 @@ export default defineConfig({
             })()
 
             const capabilityMap = (() => {
+              stage = 'capability_map'
               const role = String(targetRole ?? '').trim()
 
               const mapSkillLevel = (lvl) => {
@@ -951,6 +1171,14 @@ export default defineConfig({
 
               const commScore = /沟通|协作|跨团队|推动|引导|谈判|教练|汇报|表达/i.test(softText) ? 4 : tags.length ? 3 : 2
 
+              const expItems = Array.isArray(experience?.items) ? experience.items : []
+              const maxManaged = expItems.reduce((acc, it) => {
+                const n = Number(it?.managedCount)
+                return Number.isFinite(n) ? Math.max(acc, n) : acc
+              }, 0)
+              const hasLeadTitle = expItems.some((it) => /负责人|主管|经理|manager|lead|head/i.test(String(it?.title ?? '').trim()))
+              const mgmtScore = maxManaged >= 20 ? 5 : maxManaged >= 10 ? 4 : maxManaged >= 3 ? 3 : hasLeadTitle ? 3 : 2
+
               const engScore =
                 /DevOps|CI|CD|Jenkins|GitHub Actions|GitLab CI|Kubernetes|Docker|云原生|SRE|可观测|监控|告警|流水线|门禁/i.test(projectText) ||
                 skillNames.some((n) => /DevOps|CI|CD|Jenkins|Kubernetes|Docker|SRE|可观测/i.test(n))
@@ -977,10 +1205,10 @@ export default defineConfig({
               const influenceScore = maxStars >= 200 ? 5 : maxStars >= 50 ? 4 : artifactsItems.length ? 3 : 2
 
               const requiredPreset = (() => {
-                if (/测试|QA|质量/i.test(role)) return { tech: 4, eng: 4, domain: 3, data: 3, comm: 3, lang: 2, influence: 3 }
-                if (/产品|PM/i.test(role)) return { tech: 3, eng: 3, domain: 4, data: 4, comm: 4, lang: 3, influence: 3 }
-                if (/咨询|顾问|交付/i.test(role)) return { tech: 3, eng: 2, domain: 4, data: 4, comm: 5, lang: 3, influence: 3 }
-                return { tech: 3, eng: 3, domain: 3, data: 3, comm: 3, lang: 2, influence: 2 }
+                if (/测试|QA|质量/i.test(role)) return { tech: 4, eng: 4, domain: 3, data: 3, comm: 3, mgmt: 3, lang: 2, influence: 3 }
+                if (/产品|PM/i.test(role)) return { tech: 3, eng: 3, domain: 4, data: 4, comm: 4, mgmt: 4, lang: 3, influence: 3 }
+                if (/咨询|顾问|交付/i.test(role)) return { tech: 3, eng: 2, domain: 4, data: 4, comm: 5, mgmt: 4, lang: 3, influence: 3 }
+                return { tech: 3, eng: 3, domain: 3, data: 3, comm: 3, mgmt: 2, lang: 2, influence: 2 }
               })()
 
               const dims = [
@@ -1018,6 +1246,16 @@ export default defineConfig({
                   required: requiredPreset.comm,
                   current: commScore,
                   evidence: [tagText ? `标签：${tagText.split(' / ').slice(0, 6).join(' / ')}` : '未设置软技能标签/文本证据']
+                },
+                {
+                  key: 'mgmt',
+                  label: '管理与带团队',
+                  required: requiredPreset.mgmt,
+                  current: mgmtScore,
+                  evidence: [
+                    expItems.length ? `就职条目：${expItems.length}` : '未填写就职履历',
+                    maxManaged > 0 ? `最高管理人数：${maxManaged}` : hasLeadTitle ? '履历含负责人/管理角色关键词' : '管理经验未体现'
+                  ]
                 },
                 {
                   key: 'lang',
@@ -1119,7 +1357,47 @@ export default defineConfig({
               searchStrategy: ['明确 3-5 个岗位关键词 + 2-3 个同义词组合搜索', '按城市/年限/薪资先收敛再精确', '优先投递与项目经历高度匹配的岗位'],
               referralStrategy: ['准备 1 页“自我介绍 + 主项目亮点 + 想要的岗位”便于内推', '维护 20 人“弱关系名单”：同事/校友/社区，每周触达 2-3 人'],
               portfolioStrategy: ['作品集优先展示“可验证证据”的项目：链接/数据/复盘/截图', '每个作品都要能回答：你做了什么、难点、权衡、结果'],
-              applicationRhythm: ['每周固定节奏：筛选→投递→复盘→迭代简历', '每周至少完成 2 次面试训练（含模拟）']
+              applicationRhythm: ['每周固定节奏：筛选→投递→复盘→迭代简历', '每周至少完成 2 次面试训练（含模拟）'],
+              industryFocus: (() => {
+                const expItems = Array.isArray(experience?.items) ? experience.items : []
+                const projItems = Array.isArray(projects?.items) ? projects.items : []
+
+                const expIndustries = expItems.map((x) => String(x?.industry ?? '').trim()).filter(Boolean)
+                const projIndustries = projItems.map((x) => String(x?.industry ?? '').trim()).filter(Boolean)
+                const industries = [...expIndustries, ...projIndustries].filter(Boolean)
+                const uniq = Array.from(new Set(industries))
+
+                const depthEvidence = (() => {
+                  const achievementHasNumber = Array.isArray(achievements?.items)
+                    ? achievements.items.some((a) => /\d|%|万|k|w/i.test(String(a?.result ?? '').trim()))
+                    : false
+                  const domainNamed = projItems.some((p) => String(p?.industry ?? '').trim())
+                  const toolsCount = Array.isArray(tools?.items) ? tools.items.length : 0
+                  const evid = []
+                  if (achievementHasNumber) evid.push('有量化成果（成就）')
+                  if (domainNamed) evid.push('项目体现行业/业务背景')
+                  if (toolsCount > 0) evid.push('有结构化工具/方法沉淀')
+                  return evid
+                })()
+
+                const status = uniq.length >= 4 ? '跨行业' : uniq.length >= 2 ? '多行业' : uniq.length === 1 ? '深耕' : '未知'
+
+                const notes = []
+                if (status === '跨行业' || status === '多行业') {
+                  notes.push('切换行业不必然是负面：如果每个行业都能沉淀可迁移的方法/成果证据（指标、复盘、作品），可视为“跨域能力”。')
+                  notes.push(
+                    depthEvidence.length
+                      ? `深度证据：${depthEvidence.join(' / ')}（建议按行业分别补齐“问题→方案→结果→口径”）`
+                      : '深度证据不足：建议在最近 1-2 个行业内补齐可量化成果与作品，避免“浅尝辄止”的印象。'
+                  )
+                } else if (status === '深耕') {
+                  notes.push('行业内深耕有利于形成“领域专家”叙事：建议补齐领域知识、方法论与代表项目的可验证证据。')
+                } else {
+                  notes.push('行业信息不足：建议在项目/就职履历补齐行业字段，以便判断是否深耕或跨行业发展。')
+                }
+
+                return { status, industries: uniq.slice(0, 8), notes }
+              })()
             }
 
             const riskAndConstraints = (() => {
@@ -1141,7 +1419,9 @@ export default defineConfig({
             })()
 
             const analysis = {
+              stage: 'done',
               generatedAt: now,
+              generatedAtUtc: nowUtc,
               blocked: completenessBlocked ? { reason: '信息不完整，需补齐后才能分析差距/可行性' } : null,
               goalPanel: completenessBlocked ? null : { smart: { score: smartScore, checks: smartChecks }, feasibility, value: goalValue },
               personalPanel: {
@@ -1157,11 +1437,58 @@ export default defineConfig({
                   ].filter(Boolean)
                 },
                 consistency: { issues: consistencyIssues },
-                ladderJumper
+                ladderJumper,
+                summary: (() => {
+                  const expItems = Array.isArray(experience?.items) ? experience.items : []
+                  const projItems = Array.isArray(projects?.items) ? projects.items : []
+                  const pers = Array.isArray(personality?.items) ? personality.items : []
+                  const toolsItems = Array.isArray(tools?.items) ? tools.items : []
+
+                  const titles = expItems.map((x) => String(x?.title ?? '').trim()).filter(Boolean)
+                  const maxManaged = expItems.reduce((acc, x) => Math.max(acc, Number.isFinite(Number(x?.managedCount)) ? Number(x.managedCount) : 0), 0)
+                  const growth = [
+                    titles.length ? `岗位轨迹：${titles.slice(0, 4).join(' → ')}` : '未填写就职履历，成长轨迹不清晰',
+                    maxManaged > 0 ? `管理经验：最高管理人数约 ${maxManaged} 人` : '管理经验未体现（如目标含管理路径，建议补齐带团队/影响范围）'
+                  ]
+
+                  const projIndustries = projItems.map((p) => String(p?.industry ?? '').trim()).filter(Boolean)
+                  const projTypes = projItems.map((p) => String(p?.type ?? '').trim()).filter(Boolean)
+                  const projectExperience = [
+                    projItems.length ? `项目数量：${projItems.length}` : '未填写项目经历（建议至少 2-3 个可对外讲清楚的案例）',
+                    projIndustries.length ? `行业覆盖：${Array.from(new Set(projIndustries)).slice(0, 4).join(' / ')}` : '项目未体现行业/业务背景',
+                    projTypes.length ? `项目类型：${Array.from(new Set(projTypes)).slice(0, 4).join(' / ')}` : null
+                  ].filter(Boolean)
+
+                  const personalityText = pers.map((x) => String(x?.text ?? x ?? '').trim()).filter(Boolean)
+                  const personalitySummary = personalityText.length ? `性格特征：${personalityText.slice(0, 8).join(' / ')}` : '未填写性格特征（用于综合判断岗位匹配与沟通风格）'
+
+                  const toolkitText = toolsItems.map((x) => String(x?.name ?? '').trim()).filter(Boolean)
+                  const toolkitSummary = toolkitText.length ? `工具/方法：${toolkitText.slice(0, 10).join(' / ')}` : '工具/方法未填写（建议补齐常用图表与结构化方法论）'
+
+                  const conclusion = [
+                    expItems.length && projItems.length ? '信息较完整，可进一步把“能力”转成“可验证证据”（链接/指标/复盘）' : '信息不完整，优先补齐履历与项目，再进行差距与财务分析',
+                    toolkitText.length ? '已具备结构化工具基础，可用在需求澄清/复盘/沟通推进中形成证据' : '建议把工具/方法用于真实项目产出（图、纪要、决策记录），并沉淀为作品'
+                  ].filter(Boolean).join('；')
+
+                  return { growth, projectExperience, personalitySummary, toolkitSummary, conclusion }
+                })()
               },
               gapAnalysis: completenessBlocked ? null : { targetRole, industries, domains: gapPanels },
               artifactsPanel: {
-                insights: artifactInsights
+                insights: artifactInsights,
+                recommendedAdditions: (() => {
+                  const role = String(targetRole ?? '').trim()
+                  const out = [
+                    '补齐 1 篇“主项目复盘”：背景→目标→方案→权衡→结果→指标口径（可公开版本）',
+                    '补齐 1 个“可验证证据”的作品：链接/演示/README/截图/指标/复盘',
+                    '补齐 1 次对外表达：演讲稿/PPT/视频/文章（展示结构化表达与影响力）'
+                  ]
+                  if (/测试|QA|质量/i.test(role)) out.unshift('补齐“质量工程/自动化/门禁”作品：覆盖率、回归效率、缺陷率、稳定性治理等可量化指标')
+                  else if (/产品|PM/i.test(role)) out.unshift('补齐“需求到结果”作品：PRD/用户研究/指标体系/实验复盘/里程碑推进证据')
+                  else if (/咨询|顾问|交付/i.test(role)) out.unshift('补齐“咨询交付”作品：问题定义→方案→落地→收益量化与复盘')
+                  else out.unshift('补齐“工程化/平台化”作品：可复用组件/脚手架/自动化/可观测，配套文档与演示')
+                  return out
+                })()
               },
               resumePreparationAdvice,
               workDevelopmentAdvice,
@@ -1170,6 +1497,8 @@ export default defineConfig({
               professionalSkillsAdvice,
               languageAbilityAdvice,
               capabilityMap,
+              salaryGapPanel,
+              financialPanel,
               outputPublishingAdvice,
               influenceAdvice,
               interviewAdvice,
@@ -1185,16 +1514,75 @@ export default defineConfig({
             }
 
             await fs.mkdir(outputsDir, { recursive: true })
+            stage = 'write_outputs'
             await fs.writeFile(path.join(outputsDir, 'analysis.json'), JSON.stringify(analysis, null, 2), 'utf-8')
             await fs.writeFile(path.join(outputsDir, 'gap_analysis.json'), JSON.stringify(analysis.gapAnalysis ?? { generatedAt: now, blocked: true }, null, 2), 'utf-8')
+
+            await fs.mkdir(artifactsDir, { recursive: true })
+            stage = 'write_artifacts'
+            await fs.writeFile(path.join(artifactsDir, 'analysis_latest.json'), JSON.stringify(analysis, null, 2), 'utf-8')
+            const historyPath = path.join(artifactsDir, 'analysis_history.json')
+            const history = (await readJsonFile(historyPath, { items: [] })) ?? { items: [] }
+            const prevItems = Array.isArray(history?.items) ? history.items : []
+            const id = String(nowUtc).replace(/[^\dTZ]/g, '').slice(0, 15) || String(Date.now())
+            const entry = {
+              id,
+              generatedAt: now,
+              generatedAtUtc: nowUtc,
+              targetRole,
+              industries,
+              analysis
+            }
+            const items = [entry, ...prevItems].slice(0, 30)
+            await fs.writeFile(historyPath, JSON.stringify({ items }, null, 2), 'utf-8')
 
             res.statusCode = 200
             res.setHeader('Content-Type', 'application/json; charset=utf-8')
             res.end(JSON.stringify(analysis))
           } catch (e) {
-            res.statusCode = 500
+            const rawMsg = String(e?.message ?? e ?? '').trim()
+            const details = []
+            const stageMap = {
+              init: '初始化',
+              read_inputs: '读取输入文件',
+              salary_gap: '计算薪资差距',
+              artifact_insights: '生成作品分析',
+              language_advice: '生成语言建议',
+              capability_map: '生成能力映射',
+              write_outputs: '写入 outputs',
+              write_artifacts: '写入 artifacts'
+            }
+            const stageLabel = stageMap[String(stage)] ?? String(stage)
+            if (stageLabel) details.push(`失败阶段：${stageLabel}`)
+            if (rawMsg) details.push(`错误信息：${rawMsg}`)
+            if (/failed to fetch|ECONNREFUSED|ENOTFOUND|network/i.test(rawMsg)) {
+              details.push('可能原因：网络不可用，或本地开发服务未正常启动')
+            }
+            if (/EACCES|EPERM/i.test(rawMsg)) {
+              details.push('可能原因：目录/文件无写入权限（work/outputs 或 work/artifacts）')
+            }
+            if (/JSON/i.test(rawMsg) && /parse/i.test(rawMsg)) {
+              details.push('可能原因：某个输入 JSON 文件内容格式不正确（work/inputs/*.json）')
+            }
+            if (/Cannot read properties of undefined|is not a function|ReferenceError/i.test(rawMsg)) {
+              details.push('可能原因：输入数据结构与预期不一致，或本地分析逻辑存在运行时错误')
+            }
+            details.push('建议：先点“去补齐信息”补齐缺失字段；若仍失败，打开 DevTools/终端查看具体报错信息并按提示修订输入')
+
+            res.statusCode = 200
             res.setHeader('Content-Type', 'application/json; charset=utf-8')
-            res.end(JSON.stringify({ error: 'Analyze failed', message: String(e?.message ?? e) }))
+            res.end(
+              JSON.stringify({
+                generatedAt: requestAtLocal,
+                generatedAtUtc: requestAtUtc,
+                blocked: {
+                  reason: rawMsg ? `分析失败：${rawMsg}` : '分析失败：发生未知错误',
+                  details,
+                  stage: String(stage),
+                  error: rawMsg
+                }
+              })
+            )
           }
         })
 
@@ -1234,28 +1622,128 @@ export default defineConfig({
             const start0 = new Date(now.getFullYear(), now.getMonth(), now.getDate())
 
             const capItems = Array.isArray(analysis?.capabilityMap?.items) ? analysis.capabilityMap.items : []
-            const topGaps = capItems.filter((x) => Number(x?.gap ?? 0) > 0).slice(0, 3)
-            const gapText = topGaps.map((x) => String(x?.label ?? '').trim()).filter(Boolean)
+            const topGaps = capItems
+              .filter((x) => Number(x?.gap ?? 0) > 0)
+              .sort((a, b) => Number(b?.gap ?? 0) - Number(a?.gap ?? 0))
+              .slice(0, 4)
+            const gapLabels = topGaps.map((x) => String(x?.label ?? '').trim()).filter(Boolean)
+
+            const focusAreas = Array.isArray(analysis?.professionalSkillsAdvice?.focusAreas) ? analysis.professionalSkillsAdvice.focusAreas : []
+            const focusText = focusAreas.map((x) => String(x ?? '').trim()).filter(Boolean).slice(0, 3)
+
+            const langWeekly = Array.isArray(analysis?.languageAbilityAdvice?.weeklyPlan) ? analysis.languageAbilityAdvice.weeklyPlan : []
+            const langTasks = langWeekly.map((x) => String(x ?? '').trim()).filter(Boolean)
+
+            const toCommaList = (arr, limit) => arr.filter(Boolean).slice(0, limit).join(' / ')
+            const gapShort = toCommaList(gapLabels, 2)
+            const focusShort = toCommaList(focusText, 2)
+
+            const weekStart = (i) => addDays(start0, (i - 1) * 7)
+            const weekEnd = (i) => addDays(start0, (i - 1) * 7 + 6)
 
             const ms = []
             ms.push({
-              id: 'm1',
-              name: gapText.length ? `第 1-2 周：补齐 ${gapText.slice(0, 2).join(' / ')}` : '第 1-2 周：补齐资料与核心能力',
-              start: formatDateYMD(start0),
-              end: formatDateYMD(addDays(start0, 13))
+              id: 'w1',
+              name: `第 1 周：目标岗位能力拆解${gapShort ? `（${gapShort}）` : ''}`,
+              start: formatDateYMD(weekStart(1)),
+              end: formatDateYMD(weekEnd(1)),
+              objective: '把目标岗位拆成可执行能力项，并补齐基础材料与证据目录',
+              deliverables: ['目标岗位 JD 能力拆解表（含证据链接列）', '个人能力盘点（现状/差距/举证）', '简历信息补齐清单（缺什么补什么）'],
+              acceptanceCriteria: ['能力拆解表 >= 20 行', '每个能力至少 1 个证据入口（项目/作品/经历/草稿）']
             })
             ms.push({
-              id: 'm2',
-              name: '第 3-4 周：项目化练习 + 证据沉淀（作品集/复盘）',
-              start: formatDateYMD(addDays(start0, 14)),
-              end: formatDateYMD(addDays(start0, 27))
+              id: 'w2',
+              name: `第 2 周：补齐关键短板${gapShort ? `（${gapShort}）` : ''}`,
+              start: formatDateYMD(weekStart(2)),
+              end: formatDateYMD(weekEnd(2)),
+              objective: '针对差距最大的 1-2 项能力，做项目化练习并形成可展示产出',
+              deliverables: ['一个可展示的最小作品（Demo/截图/链接）', '一份技术/方案复盘（1-2 页）', '更新简历中的项目亮点（量化）'],
+              acceptanceCriteria: ['至少 1 个可点击链接/可演示材料', '复盘包含问题-方案-结果-反思']
             })
             ms.push({
-              id: 'm3',
-              name: '第 5-8 周：强化短板 + 面试训练 + 输出与投递节奏',
-              start: formatDateYMD(addDays(start0, 28)),
-              end: formatDateYMD(addDays(start0, 55))
+              id: 'w3',
+              name: `第 3 周：核心项目 1（对标岗位）${focusShort ? `（${focusShort}）` : ''}`,
+              start: formatDateYMD(weekStart(3)),
+              end: formatDateYMD(weekEnd(3)),
+              objective: '完成 1 个对标目标岗位的主项目/案例，能讲清楚架构、权衡与结果',
+              deliverables: ['项目 README（背景/架构/关键设计）', '关键模块代码或设计图', '可量化指标或对比结果（如性能/成本/效率）'],
+              acceptanceCriteria: ['面试 5 分钟能讲清楚：问题→方案→权衡→结果→复盘']
             })
+            ms.push({
+              id: 'w4',
+              name: '第 4 周：简历与作品集打磨（可投递版本）',
+              start: formatDateYMD(weekStart(4)),
+              end: formatDateYMD(weekEnd(4)),
+              objective: '形成可投递的简历与作品集结构，并完成 2 个版本的优化迭代',
+              deliverables: ['一页简历（中文/英文按需）', '作品集目录页（链接聚合）', 'STAR/量化表达改写清单'],
+              acceptanceCriteria: ['简历中 3-5 条成果可量化', '作品集链接齐全可打开']
+            })
+            ms.push({
+              id: 'w5',
+              name: '第 5 周：面试题库与项目讲述（强化）',
+              start: formatDateYMD(weekStart(5)),
+              end: formatDateYMD(weekEnd(5)),
+              objective: '建立面试题库并完成系统训练，补齐薄弱题型',
+              deliverables: ['面试题库（分类：基础/系统/业务/行为）', '2 次模拟面试录音或纪要', '项目讲述脚本（3/5/10 分钟版本）'],
+              acceptanceCriteria: ['模拟面试得分有对比（至少 2 次）', '能清晰回答 30+ 高频题']
+            })
+            ms.push({
+              id: 'w6',
+              name: `第 6 周：语言能力（输出与证据）`,
+              start: formatDateYMD(weekStart(6)),
+              end: formatDateYMD(weekEnd(6)),
+              objective: '把语言能力转成可验证证据（证书/输出/面试表达）',
+              deliverables: [
+                '语言能力证明（证书/成绩/测评链接）',
+                '1 篇双语/外语技术输出（文章/演讲稿/README）',
+                ...(langTasks.length ? [`本周训练：${langTasks.slice(0, 3).join('；')}`] : [])
+              ],
+              acceptanceCriteria: ['至少 1 个可验证证明', '输出内容可公开访问或可展示']
+            })
+            ms.push({
+              id: 'w7',
+              name: '第 7 周：投递与迭代（数据驱动）',
+              start: formatDateYMD(weekStart(7)),
+              end: formatDateYMD(weekEnd(7)),
+              objective: '建立投递漏斗（投递-回复-面试-Offer），用数据迭代简历与话术',
+              deliverables: ['投递表（渠道/岗位/状态/反馈）', '简历 A/B 测试记录', '常见拒信原因与修正动作'],
+              acceptanceCriteria: ['有明确每周投递目标与复盘动作', '至少 1 轮优化闭环']
+            })
+            ms.push({
+              id: 'w8',
+              name: '第 8 周：收敛与决策（Offer/留任两手准备）',
+              start: formatDateYMD(weekStart(8)),
+              end: formatDateYMD(weekEnd(8)),
+              objective: '形成最终选择方案：拿 Offer 或内部发展路线（不跳槽版本）',
+              deliverables: ['Offer/留任决策矩阵', '谈薪/谈职责话术', '未来 3 个月行动计划（滚动）'],
+              acceptanceCriteria: ['能给出 2 套可执行方案，并明确风险与缓解']
+            })
+
+            const todos = []
+            const addTodo = (milestoneId, title, due, priority, evidence) => {
+              todos.push({
+                id: `${milestoneId}-${String(todos.length + 1).padStart(2, '0')}`,
+                milestoneId,
+                title,
+                due,
+                status: 'todo',
+                priority,
+                evidence
+              })
+            }
+            addTodo('w1', '完成目标岗位 JD 拆解表（含证据列）', formatDateYMD(addDays(weekStart(1), 2)), 'P0', '表格链接/截图')
+            addTodo('w1', '补齐简历基础信息与缺失条目', formatDateYMD(addDays(weekStart(1), 5)), 'P0', '分析页缺失项清零')
+            addTodo('w2', '完成最小作品 Demo（可展示）', formatDateYMD(addDays(weekStart(2), 4)), 'P0', '链接/截图/演示视频')
+            addTodo('w2', '产出一次复盘（问题-方案-结果-反思）', formatDateYMD(addDays(weekStart(2), 6)), 'P1', '文章/文档链接')
+            addTodo('w3', '核心项目 1：补齐 README/架构图/关键权衡', formatDateYMD(addDays(weekStart(3), 6)), 'P0', 'README/架构图')
+            addTodo('w4', '简历改写：至少 3 条成果量化', formatDateYMD(addDays(weekStart(4), 3)), 'P0', '简历版本对比')
+            addTodo('w4', '作品集目录页（统一链接）', formatDateYMD(addDays(weekStart(4), 6)), 'P1', '聚合页链接')
+            addTodo('w5', '整理面试题库（>=30 高频题）', formatDateYMD(addDays(weekStart(5), 4)), 'P0', '题库文档')
+            addTodo('w5', '完成 1 次模拟面试并复盘', formatDateYMD(addDays(weekStart(5), 6)), 'P1', '录音/纪要')
+            addTodo('w6', '语言证明材料整理（证书/成绩/测评）', formatDateYMD(addDays(weekStart(6), 2)), 'P1', '证明截图/链接')
+            addTodo('w6', '语言输出 1 篇（双语/外语）', formatDateYMD(addDays(weekStart(6), 6)), 'P2', '文章/README')
+            addTodo('w7', '建立投递漏斗表并设定每周目标', formatDateYMD(addDays(weekStart(7), 1)), 'P0', '表格链接')
+            addTodo('w8', '完成决策矩阵（Offer vs 留任）', formatDateYMD(addDays(weekStart(8), 4)), 'P0', '决策文档')
 
             const weeklyRoutine = {
               focus: hoursPerWeek == null ? '建议先填写每周可投入时间（hoursPerWeek）后再细化节奏' : `每周可投入约 ${hoursPerWeek} 小时`,
@@ -1281,6 +1769,7 @@ export default defineConfig({
               generatedAt: formatDateYMD(start0),
               basedOn: { analysisGeneratedAt: String(analysis?.generatedAt ?? '') },
               milestones: ms,
+              todos,
               weeklyRoutine,
               projects
             }

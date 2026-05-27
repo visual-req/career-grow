@@ -38,5 +38,8 @@ export type Goals = {
 export type Constraints = {
   hoursPerWeek: number | null
   geoAndMode: string
+  housingType?: 'rent' | 'own' | 'unknown'
+  rentType?: 'shared' | 'alone' | 'unknown'
+  commuteMode?: 'metro_bus' | 'taxi' | 'drive' | 'unknown'
   notes: string
 }

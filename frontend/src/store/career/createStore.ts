@@ -12,6 +12,7 @@ import {
   genderOptions,
   hashtagCategories,
   industryOptions,
+  languageCertOptions,
   languageLevelOptions,
   languageNameOptions,
   lifeStatusOptions,
@@ -23,6 +24,8 @@ import {
   socialPlatformOptions,
   speechLocationOptions,
   strengthsQuickOptions,
+  toolkitOptions,
+  toolkitTreeData,
   techStackTreeData,
   weaknessesQuickOptions,
   workModeOptions,
@@ -59,11 +62,13 @@ function createCareerStore() {
       profile: ['个人简历', '个人信息', '个人信息'],
       hashtags: ['个人简历', '个人信息', '标签'],
       skills: ['个人简历', '个人信息', '技能'],
+      tools: ['个人简历', '个人信息', '工具/方法'],
       languages: ['个人简历', '个人信息', '语言'],
       strengths: ['个人简历', '个人信息', '长处/短处'],
       education: ['个人简历', '履历', '教育履历'],
       experience: ['个人简历', '履历', '就职履历'],
       projects: ['个人简历', '履历', '项目履历'],
+      moments: ['个人简历', '履历', '精彩履历'],
       artifacts: ['个人简历', '证明材料', '作品'],
       awards: ['个人简历', '证明材料', '奖励'],
       honors: ['个人简历', '证明材料', '荣誉'],
@@ -77,6 +82,7 @@ function createCareerStore() {
       personality: ['个人简历', '特征', '性格特征'],
       goals: ['目标', '目标设定'],
       goalCandidates: ['目标', '候选'],
+      verification: ['目标', '验证信息'],
       analysis: ['分析'],
       plan: ['发展计划']
     }
@@ -149,6 +155,7 @@ function createCareerStore() {
   const experienceItems = ref([] as any[])
   const artifactsItems = ref([] as any[])
   const projectsItems = ref([] as any[])
+  const momentsItems = ref([] as any[])
   const awardsItems = ref([] as any[])
   const honorsItems = ref([] as any[])
   const achievementsItems = ref([] as any[])
@@ -159,6 +166,7 @@ function createCareerStore() {
   const strengthsItems = ref([] as any[])
   const weaknessesItems = ref([] as any[])
   const skillsItems = ref([] as any[])
+  const toolsItems = ref([] as any[])
   const languagesItems = ref([] as any[])
   const jobIntentItems = ref([] as any[])
   const personalityItems = ref([] as any[])
@@ -169,6 +177,8 @@ function createCareerStore() {
   const personalityQuickSelected = ref([] as any[])
   const skillsQuickSelected = ref([] as any[])
   const skillsQuickLevel = ref('intermediate')
+  const toolsQuickSelected = ref([] as any[])
+  const toolsQuickLevel = ref('intermediate')
 
   const hashtagData = ref({
     selected: [] as string[]
@@ -199,11 +209,41 @@ function createCareerStore() {
   const constraints = ref<Constraints>({
     hoursPerWeek: null,
     geoAndMode: '',
+    housingType: 'unknown',
+    rentType: 'unknown',
+    commuteMode: 'unknown',
     notes: ''
   })
 
+  const verification = ref<any>({
+    target: {
+      city: '',
+      role: '',
+      updatedAt: ''
+    },
+    salary: {
+      grossMinK: null,
+      grossMaxK: null,
+      netMinK: null,
+      netMaxK: null,
+      bonusMonths: null,
+      notes: '',
+      sources: [] as string[]
+    },
+    cost: {
+      rentK: null,
+      commuteK: null,
+      foodK: null,
+      otherK: null,
+      notes: ''
+    },
+    tax: {
+      notes: ''
+    }
+  })
+
   const planText = ref('')
-  const planPlaceholder = '{\n  "milestones": [],\n  "weeklyRoutine": {},\n  "projects": []\n}'
+  const planPlaceholder = '{\n  "milestones": [],\n  "todos": [],\n  "weeklyRoutine": {},\n  "projects": []\n}'
 
   const planParseError = computed(() => {
     const raw = String(planText.value ?? '').trim()
@@ -239,7 +279,12 @@ function createCareerStore() {
         id: m?.id ?? makeId(),
         name: String(m?.name ?? m?.title ?? '').trim(),
         start: String(m?.start ?? '').trim(),
-        end: String(m?.end ?? '').trim()
+        end: String(m?.end ?? '').trim(),
+        objective: String(m?.objective ?? '').trim(),
+        deliverables: Array.isArray(m?.deliverables) ? m.deliverables.map((x: any) => String(x ?? '').trim()).filter(Boolean) : [],
+        acceptanceCriteria: Array.isArray(m?.acceptanceCriteria)
+          ? m.acceptanceCriteria.map((x: any) => String(x ?? '').trim()).filter(Boolean)
+          : []
       }))
       .filter((t: any) => t.name && t.start && t.end)
 
@@ -282,6 +327,7 @@ function createCareerStore() {
     { title: '公司', dataIndex: 'company', key: 'company' },
     { title: '公司类型', dataIndex: 'companyType', key: 'companyType' },
     { title: '职位', dataIndex: 'title', key: 'title' },
+    { title: '月薪(k)', dataIndex: 'monthlySalary', key: 'monthlySalary' },
     { title: '汇报给', dataIndex: 'reportingTo', key: 'reportingTo' },
     { title: '管理人数', dataIndex: 'managedCount', key: 'managedCount' },
     { title: '地点', dataIndex: 'location', key: 'location' },
@@ -312,6 +358,34 @@ function createCareerStore() {
     { title: '技术栈', dataIndex: 'stack', key: 'stack' },
     { title: '时间', dataIndex: 'range', key: 'range' },
     { title: '链接', dataIndex: 'link', key: 'link' },
+    { title: '操作', key: 'actions' }
+  ]
+
+  const momentsColumns = [
+    { title: '标题', dataIndex: 'title', key: 'title' },
+    { title: '时间', dataIndex: 'range', key: 'range' },
+    {
+      title: '工具/方法',
+      dataIndex: 'toolkit',
+      key: 'toolkit',
+      customRender: ({ record }: any) => {
+        const arr = Array.isArray(record?.toolkit) ? record.toolkit : []
+        const text = arr.map((x: any) => String(x ?? '').trim()).filter(Boolean).join(' / ')
+        if (!text) return ''
+        return text.length > 30 ? `${text.slice(0, 30)}…` : text
+      }
+    },
+    {
+      title: '亮点',
+      dataIndex: 'highlights',
+      key: 'highlights',
+      customRender: ({ record }: any) => {
+        const raw = String(record?.highlights ?? '').trim()
+        if (!raw) return ''
+        const one = raw.split('\n').map((x) => x.trim()).filter(Boolean)[0] ?? ''
+        return one.length > 30 ? `${one.slice(0, 30)}…` : one
+      }
+    },
     { title: '操作', key: 'actions' }
   ]
 
@@ -354,6 +428,22 @@ function createCareerStore() {
     { title: '操作', key: 'actions' }
   ]
 
+  const toolsColumns = [
+    { title: '工具/方法', dataIndex: 'name', key: 'name' },
+    { title: '类别', dataIndex: 'category', key: 'category' },
+    {
+      title: '熟练度',
+      dataIndex: 'level',
+      key: 'level',
+      customRender: ({ text }: any) => {
+        const v = String(text ?? '')
+        return skillLevelLabelMap.value[v] ?? v
+      }
+    },
+    { title: '说明', dataIndex: 'note', key: 'note' },
+    { title: '操作', key: 'actions' }
+  ]
+
   const languagesColumns = [
     { title: '语言', dataIndex: 'name', key: 'name' },
     {
@@ -365,6 +455,7 @@ function createCareerStore() {
         return languageLevelLabelMap.value[v] ?? v
       }
     },
+    { title: '证书', dataIndex: 'cert', key: 'cert' },
     { title: '说明', dataIndex: 'note', key: 'note' },
     { title: '操作', key: 'actions' }
   ]
@@ -427,6 +518,19 @@ function createCareerStore() {
     { title: '平台', dataIndex: 'platform', key: 'platform' },
     { title: '账号名', dataIndex: 'account', key: 'account' },
     { title: '链接', dataIndex: 'url', key: 'url' },
+    { title: '关注者', dataIndex: 'followerCount', key: 'followerCount' },
+    { title: '发布数', dataIndex: 'postCount', key: 'postCount' },
+    {
+      title: '内容标签',
+      dataIndex: 'contentTags',
+      key: 'contentTags',
+      customRender: ({ record }: any) => {
+        const tags = Array.isArray(record?.contentTags) ? record.contentTags : typeof record?.contentTags === 'string' ? record.contentTags.split(/[,\s/|]+/).filter(Boolean) : []
+        const text = tags.map((x: any) => String(x ?? '').trim()).filter(Boolean).join(' / ')
+        if (!text) return ''
+        return text.length > 40 ? `${text.slice(0, 40)}…` : text
+      }
+    },
     { title: '备注', dataIndex: 'note', key: 'note' },
     { title: '操作', key: 'actions' }
   ]
@@ -447,11 +551,13 @@ function createCareerStore() {
       experience: '就职履历',
       artifacts: '作品',
       projects: '项目',
+      moments: '精彩履历',
       awards: '奖励',
       honors: '荣誉',
       achievements: '成就',
       certificates: '证书',
       skills: '技能',
+      tools: '工具/方法',
       languages: '语言',
       speech: '演讲',
       community: '社区',
@@ -487,11 +593,13 @@ function createCareerStore() {
       experience: experienceItems,
       artifacts: artifactsItems,
       projects: projectsItems,
+      moments: momentsItems,
       awards: awardsItems,
       honors: honorsItems,
       achievements: achievementsItems,
       certificates: certificatesItems,
       skills: skillsItems,
+      tools: toolsItems,
       languages: languagesItems,
       speech: speechItems,
       community: communityItems,
@@ -527,6 +635,7 @@ function createCareerStore() {
         company: '',
         companyType: '私企',
         title: '',
+        monthlySalary: null,
         reportingTo: '',
         managedCount: 0,
         location: '',
@@ -571,15 +680,38 @@ function createCareerStore() {
         link: '',
         highlights: ''
       }
+    if (section === 'moments')
+      return {
+        id: makeId(),
+        title: '',
+        start: '',
+        end: '',
+        story: '',
+        highlights: '',
+        toolkit: [] as string[],
+        process: '',
+        evidence: ''
+      }
     if (section === 'awards') return { id: makeId(), name: '', org: '', date: '', link: '', note: '' }
     if (section === 'honors') return { id: makeId(), name: '', org: '', date: '', link: '', note: '' }
     if (section === 'achievements') return { id: makeId(), name: '', domain: '', result: '', date: '', note: '' }
     if (section === 'certificates') return { id: makeId(), name: '', customName: '', org: '', date: '', link: '', note: '' }
     if (section === 'skills') return { id: makeId(), name: '', customName: '', level: 'intermediate', note: '' }
-    if (section === 'languages') return { id: makeId(), name: '', level: 'working', note: '' }
+    if (section === 'tools') return { id: makeId(), name: '', category: '图表', level: 'intermediate', note: '' }
+    if (section === 'languages') return { id: makeId(), name: '', level: 'working', cert: '', note: '' }
     if (section === 'speech') return { id: makeId(), topic: '', event: '', location: '', date: '', link: '', note: '' }
     if (section === 'community') return { id: makeId(), org: '', role: '', date: '', link: '', note: '' }
-    if (section === 'social') return { id: makeId(), platform: '', account: '', url: '', note: '' }
+    if (section === 'social')
+      return {
+        id: makeId(),
+        platform: '',
+        account: '',
+        url: '',
+        contentTags: [] as string[],
+        postCount: null,
+        followerCount: null,
+        note: ''
+      }
     if (section === 'jobIntent') return { id: makeId(), targetRole: '', industries: '', workModes: ['remote'], location: '', salary: '', note: '' }
     if (section === 'goalItems') return { id: makeId(), industry: '', role: '', salary: '' }
     if (section === 'jobCandidates')
@@ -609,6 +741,19 @@ function createCareerStore() {
       const ct = String(result.companyType ?? '').trim()
       if (ct === '外资') result.companyType = '外资（其他）'
     }
+    if (section === 'experience') {
+      const toNumOrNull = (v: any) => {
+        if (v == null || v === '') return null
+        const n = Number(v)
+        return Number.isFinite(n) ? n : null
+      }
+      result.company = String(result.company ?? '').trim()
+      result.companyType = String(result.companyType ?? '').trim()
+      result.title = String(result.title ?? '').trim()
+      result.monthlySalary = toNumOrNull(result.monthlySalary)
+      result.reportingTo = String(result.reportingTo ?? '').trim()
+      result.location = String(result.location ?? '').trim()
+    }
     if (section === 'projects') {
       const tech = Array.isArray(result.techStack) ? result.techStack : result.techStack ? [result.techStack] : []
       const techText = tech.map((x: any) => String(x ?? '').trim()).filter(Boolean)
@@ -619,6 +764,22 @@ function createCareerStore() {
       result.end = dr?.[1] ?? result.end ?? ''
       result.range = [result.start, result.end].filter(Boolean).join(' ~ ')
       delete result.dateRange
+    }
+    if (section === 'moments') {
+      result.title = String(result.title ?? '').trim()
+      result.start = String(result.start ?? '').trim()
+      result.end = String(result.end ?? '').trim()
+      result.range = [result.start, result.end].filter(Boolean).join(' ~ ')
+      result.story = String(result.story ?? '').trim()
+      result.highlights = String(result.highlights ?? '').trim()
+      const rawToolkit = Array.isArray(result.toolkit)
+        ? result.toolkit
+        : typeof result.toolkit === 'string'
+          ? result.toolkit.split(/[,\s/|]+/).filter(Boolean)
+          : []
+      result.toolkit = normalizeTags(rawToolkit)
+      result.process = String(result.process ?? '').trim()
+      result.evidence = String(result.evidence ?? '').trim()
     }
     if (section === 'jobIntent') {
       const fromLegacy = String(result.workMode ?? '').trim()
@@ -644,6 +805,18 @@ function createCareerStore() {
       if (custom) result.name = custom
       delete result.customName
     }
+    if (section === 'tools') {
+      result.name = String(result.name ?? '').trim()
+      result.category = String(result.category ?? '').trim() || '图表'
+      result.level = String(result.level ?? '').trim() || 'intermediate'
+      result.note = String(result.note ?? '').trim()
+    }
+    if (section === 'languages') {
+      result.name = String(result.name ?? '').trim()
+      result.level = String(result.level ?? '').trim()
+      result.cert = String(result.cert ?? '').trim()
+      result.note = String(result.note ?? '').trim()
+    }
     if (section === 'jobCandidates') {
       result.title = String(result.title ?? '').trim()
       result.company = String(result.company ?? '').trim()
@@ -656,6 +829,25 @@ function createCareerStore() {
       result.publishedAt = formatDateYMD(result.publishedAt)
       result.expireAt = formatDateYMD(result.expireAt)
       result.updatedAt = formatDateYMD(result.updatedAt)
+    }
+    if (section === 'social') {
+      result.platform = String(result.platform ?? '').trim()
+      result.account = String(result.account ?? '').trim()
+      result.url = String(result.url ?? '').trim()
+      const rawTags = Array.isArray(result.contentTags)
+        ? result.contentTags
+        : typeof result.contentTags === 'string'
+          ? result.contentTags.split(/[,\s/|]+/).filter(Boolean)
+          : []
+      result.contentTags = normalizeTags(rawTags)
+      const toNumOrNull = (v: any) => {
+        if (v == null || v === '') return null
+        const n = Number(v)
+        return Number.isFinite(n) ? n : null
+      }
+      result.postCount = toNumOrNull(result.postCount)
+      result.followerCount = toNumOrNull(result.followerCount)
+      result.note = String(result.note ?? '').trim()
     }
     return result
   }
@@ -750,14 +942,82 @@ function createCareerStore() {
     skillsQuickSelected.value = []
   }
 
+  function addToolsSelected() {
+    const selectedRaw = Array.isArray(toolsQuickSelected.value) ? toolsQuickSelected.value : []
+    const selected = selectedRaw.map((x: any) => String(x ?? '').trim()).filter(Boolean)
+    if (selected.length === 0) return
+    const existing = new Set((Array.isArray(toolsItems.value) ? toolsItems.value : []).map((x: any) => String(x?.name ?? '').trim()).filter(Boolean))
+    const level = String(toolsQuickLevel.value ?? 'intermediate') || 'intermediate'
+    const categoryMap = new Map<string, string>()
+    const walk = (nodes: any[]) => {
+      ;(Array.isArray(nodes) ? nodes : []).forEach((n: any) => {
+        const v = String(n?.value ?? '').trim()
+        const c = String(n?.category ?? '').trim()
+        if (v && c) categoryMap.set(v, c)
+        if (Array.isArray(n?.children)) walk(n.children)
+      })
+    }
+    walk(toolkitTreeData as any[])
+    const newItems = selected
+      .filter((name) => name && !existing.has(name))
+      .map((name) => ({
+        id: makeId(),
+        name,
+        category: categoryMap.get(name) || '图表',
+        level,
+        note: ''
+      }))
+    if (newItems.length === 0) return
+    toolsItems.value = [...newItems, ...toolsItems.value]
+    toolsQuickSelected.value = []
+  }
+
   const analyzeLoading = ref(false)
   const analyzeError = ref('')
   const analyzeResult = ref<any>(null)
+  const analyzeHistoryLoading = ref(false)
+  const analyzeHistoryError = ref('')
+  const analyzeHistory = ref([] as any[])
   const smartColumns = [
     { title: '项', dataIndex: 'key', key: 'key' },
     { title: '检查点', dataIndex: 'name', key: 'name' },
     { title: '是否通过', dataIndex: 'pass', key: 'pass' }
   ]
+
+  async function loadAnalyzeHistory() {
+    analyzeHistoryError.value = ''
+    analyzeHistoryLoading.value = true
+    try {
+      const res = await fetch('/api/artifacts/analysis_history.json', { method: 'GET' })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const data = await res.json()
+      analyzeHistory.value = Array.isArray(data?.items) ? data.items : []
+    } catch (e: any) {
+      analyzeHistory.value = []
+      analyzeHistoryError.value = String(e?.message ?? e)
+    } finally {
+      analyzeHistoryLoading.value = false
+    }
+  }
+
+  async function loadLatestAnalyze() {
+    analyzeError.value = ''
+    try {
+      const res = await fetch('/api/artifacts/analysis_latest.json', { method: 'GET' })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      analyzeResult.value = await res.json()
+    } catch (e: any) {
+      analyzeError.value = String(e?.message ?? e)
+    }
+  }
+
+  function showAnalyzeFromHistory(id: any) {
+    const key = String(id ?? '').trim()
+    if (!key) return
+    const items = Array.isArray(analyzeHistory.value) ? analyzeHistory.value : []
+    const found = items.find((x: any) => String(x?.id ?? '').trim() === key)
+    if (found?.analysis) analyzeResult.value = found.analysis
+  }
 
   async function runAnalyze() {
     if (analyzeResult.value) {
@@ -771,6 +1031,7 @@ function createCareerStore() {
       const res = await fetch('/api/analyze', { method: 'POST' })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       analyzeResult.value = await res.json()
+      void loadAnalyzeHistory()
     } catch (e: any) {
       analyzeError.value = String(e?.message ?? e)
     } finally {
@@ -780,11 +1041,18 @@ function createCareerStore() {
 
   const planLoading = ref(false)
   const planError = ref('')
+  const planStatus = ref<'idle' | 'running' | 'done' | 'error'>('idle')
+  const planProgress = ref(0)
+  const planMessage = ref('')
 
   async function runPlan() {
     planError.value = ''
+    planStatus.value = 'running'
+    planProgress.value = 15
+    planMessage.value = '正在生成计划...'
     planLoading.value = true
     try {
+      planProgress.value = 35
       const res = await fetch('/api/plan', { method: 'POST' })
       if (!res.ok) {
         let payload: any = null
@@ -796,8 +1064,12 @@ function createCareerStore() {
         const msg = String(payload?.message ?? payload?.error ?? '').trim()
         throw new Error(msg ? `${msg}（HTTP ${res.status}）` : `请求失败（HTTP ${res.status}）`)
       }
+      planProgress.value = 75
       const data = await res.json()
       planText.value = JSON.stringify(data, null, 2)
+      planProgress.value = 100
+      planStatus.value = 'done'
+      planMessage.value = '计划已生成'
     } catch (e: any) {
       const raw = String(e?.message ?? e ?? '').trim()
       const offline = typeof navigator !== 'undefined' && navigator && navigator.onLine === false
@@ -808,6 +1080,9 @@ function createCareerStore() {
       } else {
         planError.value = raw || '生成计划失败'
       }
+      planStatus.value = 'error'
+      planProgress.value = 0
+      planMessage.value = ''
     } finally {
       planLoading.value = false
     }
@@ -986,6 +1261,9 @@ function createCareerStore() {
     const projectsData = await getJson('/api/inputs/projects.json')
     projectsItems.value = withIds(Array.isArray(projectsData?.items) ? projectsData.items : [])
 
+    const momentsData = await getJson('/api/inputs/moments.json')
+    momentsItems.value = withIds(Array.isArray(momentsData?.items) ? momentsData.items : [])
+
     const awardsData = await getJson('/api/inputs/awards.json')
     awardsItems.value = withIds(Array.isArray(awardsData?.items) ? awardsData.items : [])
 
@@ -1016,6 +1294,9 @@ function createCareerStore() {
     const skillsData = await getJson('/api/inputs/skills.json')
     skillsItems.value = withIds(Array.isArray(skillsData?.items) ? skillsData.items : [])
 
+    const toolsData = await getJson('/api/inputs/tools.json')
+    toolsItems.value = withIds(Array.isArray(toolsData?.items) ? toolsData.items : [])
+
     const languagesData = await getJson('/api/inputs/languages.json')
     languagesItems.value = withIds(Array.isArray(languagesData?.items) ? languagesData.items : [])
 
@@ -1036,6 +1317,50 @@ function createCareerStore() {
 
     const constraintsData = await getJson('/api/inputs/constraints.json')
     if (constraintsData && typeof constraintsData === 'object') constraints.value = { ...constraints.value, ...(constraintsData as any) } as any
+
+    const verificationData = await getJson('/api/inputs/verification.json')
+    if (verificationData && typeof verificationData === 'object') {
+      const t = (verificationData as any).target ?? {}
+      const s = (verificationData as any).salary ?? {}
+      const c = (verificationData as any).cost ?? {}
+      const tax = (verificationData as any).tax ?? {}
+      verification.value = {
+        ...verification.value,
+        ...(verificationData as any),
+        target: {
+          ...verification.value.target,
+          ...t,
+          city: String(t?.city ?? verification.value.target.city ?? ''),
+          role: String(t?.role ?? verification.value.target.role ?? ''),
+          updatedAt: String(t?.updatedAt ?? verification.value.target.updatedAt ?? '')
+        },
+        salary: {
+          ...verification.value.salary,
+          ...s,
+          grossMinK: typeof s?.grossMinK === 'number' && Number.isFinite(s.grossMinK) ? s.grossMinK : verification.value.salary.grossMinK,
+          grossMaxK: typeof s?.grossMaxK === 'number' && Number.isFinite(s.grossMaxK) ? s.grossMaxK : verification.value.salary.grossMaxK,
+          netMinK: typeof s?.netMinK === 'number' && Number.isFinite(s.netMinK) ? s.netMinK : verification.value.salary.netMinK,
+          netMaxK: typeof s?.netMaxK === 'number' && Number.isFinite(s.netMaxK) ? s.netMaxK : verification.value.salary.netMaxK,
+          bonusMonths: typeof s?.bonusMonths === 'number' && Number.isFinite(s.bonusMonths) ? s.bonusMonths : verification.value.salary.bonusMonths,
+          notes: String(s?.notes ?? verification.value.salary.notes ?? ''),
+          sources: Array.isArray(s?.sources) ? s.sources.map((x: any) => String(x ?? '').trim()).filter(Boolean) : verification.value.salary.sources
+        },
+        cost: {
+          ...verification.value.cost,
+          ...c,
+          rentK: typeof c?.rentK === 'number' && Number.isFinite(c.rentK) ? c.rentK : verification.value.cost.rentK,
+          commuteK: typeof c?.commuteK === 'number' && Number.isFinite(c.commuteK) ? c.commuteK : verification.value.cost.commuteK,
+          foodK: typeof c?.foodK === 'number' && Number.isFinite(c.foodK) ? c.foodK : verification.value.cost.foodK,
+          otherK: typeof c?.otherK === 'number' && Number.isFinite(c.otherK) ? c.otherK : verification.value.cost.otherK,
+          notes: String(c?.notes ?? verification.value.cost.notes ?? '')
+        },
+        tax: {
+          ...verification.value.tax,
+          ...tax,
+          notes: String(tax?.notes ?? verification.value.tax.notes ?? '')
+        }
+      }
+    }
 
     const hashtag = await getJson('/api/inputs/hashtag.json')
     if (hashtag && typeof hashtag === 'object') {
@@ -1084,6 +1409,13 @@ function createCareerStore() {
         projectsItems,
         () => {
           scheduleSave('projects', () => putJson('/api/inputs/projects.json', { items: projectsItems.value }))
+        },
+        { deep: true }
+      )
+      watch(
+        momentsItems,
+        () => {
+          scheduleSave('moments', () => putJson('/api/inputs/moments.json', { items: momentsItems.value }))
         },
         { deep: true }
       )
@@ -1158,6 +1490,13 @@ function createCareerStore() {
         { deep: true }
       )
       watch(
+        toolsItems,
+        () => {
+          scheduleSave('tools', () => putJson('/api/inputs/tools.json', { items: toolsItems.value }))
+        },
+        { deep: true }
+      )
+      watch(
         languagesItems,
         () => {
           scheduleSave('languages', () => putJson('/api/inputs/languages.json', { items: languagesItems.value }))
@@ -1200,6 +1539,20 @@ function createCareerStore() {
         { deep: true }
       )
       watch(
+        verification,
+        () => {
+          const payload = {
+            ...verification.value,
+            target: {
+              ...verification.value?.target,
+              updatedAt: formatDateYMD(new Date().toISOString())
+            }
+          }
+          scheduleSave('verification', () => putJson('/api/inputs/verification.json', payload))
+        },
+        { deep: true }
+      )
+      watch(
         hashtagData,
         () => {
           scheduleSave('hashtag', () => putJson('/api/inputs/hashtag.json', { selected: hashtagData.value.selected }))
@@ -1231,6 +1584,7 @@ function createCareerStore() {
     experienceItems,
     artifactsItems,
     projectsItems,
+    momentsItems,
     awardsItems,
     honorsItems,
     achievementsItems,
@@ -1241,6 +1595,7 @@ function createCareerStore() {
     strengthsItems,
     weaknessesItems,
     skillsItems,
+    toolsItems,
     languagesItems,
     jobIntentItems,
     personalityItems,
@@ -1251,6 +1606,7 @@ function createCareerStore() {
     addHashtag,
     goals,
     constraints,
+    verification,
     planText,
     planPlaceholder,
     planParseError,
@@ -1261,11 +1617,13 @@ function createCareerStore() {
     experienceColumns,
     artifactsColumns,
     projectsColumns,
+    momentsColumns,
     awardsColumns,
     honorsColumns,
     achievementsColumns,
     certificatesColumns,
     skillsColumns,
+    toolsColumns,
     languagesColumns,
     goalItemsColumns,
     jobIntentColumns,
@@ -1293,18 +1651,24 @@ function createCareerStore() {
     workModeOptions,
     industryOptions,
     strengthsQuickOptions,
+    toolkitOptions,
+    toolkitTreeData,
     weaknessesQuickOptions,
     strengthsQuickSelected,
     weaknessesQuickSelected,
     skillsQuickSelected,
     skillsQuickLevel,
+    toolsQuickSelected,
+    toolsQuickLevel,
     addStrengthsSelected,
     addWeaknessesSelected,
     addSkillsSelected,
+    addToolsSelected,
     skillTreeData,
     skillLevelOptions,
     languageNameOptions,
     languageLevelOptions,
+    languageCertOptions,
     artifactTypeOptions,
     projectTypeOptions,
     techStackTreeData,
@@ -1321,10 +1685,19 @@ function createCareerStore() {
     analyzeLoading,
     analyzeError,
     analyzeResult,
+    analyzeHistoryLoading,
+    analyzeHistoryError,
+    analyzeHistory,
     smartColumns,
     runAnalyze,
+    loadAnalyzeHistory,
+    loadLatestAnalyze,
+    showAnalyzeFromHistory,
     planLoading,
     planError,
+    planStatus,
+    planProgress,
+    planMessage,
     runPlan,
     crawlLoading,
     crawlError,
